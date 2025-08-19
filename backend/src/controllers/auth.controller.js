@@ -1,12 +1,12 @@
 import ValidateSignUpData from "../utils/ValidateSignUpData.js";
 import UserModel from "../model/UserModel.js";
 import jwt from "jsonwebtoken";
+import validator from "validator"
 
 export const SignUp = async (req, res) => {
     try {
         const { isValid, errors } = ValidateSignUpData(req);
 
-        const { isValid, errors } = ValidateSignUpData(req);
 
         if (!isValid) {
             return res.status(400).json({ message: "Validation failed", errors });
@@ -37,3 +37,46 @@ export const SignUp = async (req, res) => {
             .json({ message: "Internal Server Error", error: error.message });
     }
 };
+
+export const Login = async (req, res) => {
+
+    try {
+        const { username, password } = req.body;
+
+        if (!username || validator.isEmpty(username.trim())) {
+            return res.status(400).json({ message: "Email is required" })
+        } else if (!password || validator.isEmpty(password.trim())) {
+            return res.status(400).json({ message: "Password is required" })
+        }
+
+        let query = {};
+        if (identifier.includes("@")) {
+            query.email = identifier;
+        } else {
+            query.username = identifier;
+        }
+
+        const user = await UserModel.findOne(query);
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid Email or Password" });
+        }
+
+        const isPasswordMatched = user.validatePassword(password);
+        if (!isPasswordMatched) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "8h" }
+        );
+
+        res.cookies("token", token, { httpOnly: "true" })
+        return res.json({ message: "Login successful" });
+
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}

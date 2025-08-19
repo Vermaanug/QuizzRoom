@@ -40,10 +40,20 @@ const userSchema = new mongoose.Schema({
 
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next(); 
+  if (!this.isModified("password")) return next();
   this.password = await bcryptjs.hash(this.password, 10);
   next();
 });
+
+userSchema.methods.validatePassword = async function (password) {
+  const isPasswordCorrect = await bcryptjs.compare(password, this.password);
+
+  if (!isPasswordCorrect) {
+    throw new Error("Invalid credentials");
+  }
+
+  return isPasswordCorrect;
+};
 
 const UserModel = mongoose.model("User", userSchema);
 
