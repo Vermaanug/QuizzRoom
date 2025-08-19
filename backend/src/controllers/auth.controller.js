@@ -50,10 +50,10 @@ export const Login = async (req, res) => {
         }
 
         let query = {};
-        if (identifier.includes("@")) {
-            query.email = identifier;
+        if (username.includes("@")) {
+            query.email = username;
         } else {
-            query.username = identifier;
+            query.username = username;
         }
 
         const user = await UserModel.findOne(query);
@@ -62,7 +62,7 @@ export const Login = async (req, res) => {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
 
-        const isPasswordMatched = user.validatePassword(password);
+        const isPasswordMatched = await user.validatePassword(password);
         if (!isPasswordMatched) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
@@ -73,7 +73,7 @@ export const Login = async (req, res) => {
             { expiresIn: "8h" }
         );
 
-        res.cookies("token", token, { httpOnly: "true" })
+        res.cookie("token", token, { httpOnly: true })
         return res.json({ message: "Login successful" });
 
     } catch (error) {
