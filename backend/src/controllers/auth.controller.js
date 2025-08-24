@@ -52,6 +52,7 @@ export const Login = async (req, res) => {
     }
 
     let query = {};
+
     if (username.includes("@")) {
       query.email = username;
     } else {
@@ -69,7 +70,7 @@ export const Login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "8h",
     });
 
