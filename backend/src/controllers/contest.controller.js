@@ -1,6 +1,6 @@
 import ContestModal from "../model/ContestModal.js";
 
-export const createRoom = async (req, res) => {
+export const createContest = async (req, res) => {
     try {
         const { roomName, numberOfQuestions, timePerQuestion } = req.body
 

@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
+      select: false
     },
   },
   { timestamps: true }
@@ -56,6 +57,7 @@ userSchema.methods.validatePassword = async function (password) {
 
   return isPasswordCorrect;
 };
+
 
 const UserModel = mongoose.model("User", userSchema);
 

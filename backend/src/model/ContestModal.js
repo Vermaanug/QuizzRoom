@@ -53,7 +53,7 @@ const contestSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       max: function () {
-        return this.totalParticipants;
+        return this?.totalParticipants;
       },
     },
   },
