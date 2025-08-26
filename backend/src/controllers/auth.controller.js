@@ -8,7 +8,7 @@ export const SignUp = async (req, res) => {
     const { isValid, errors } = ValidateSignUpData(req);
 
     if (!isValid) {
-      return res.status(400).json({ message: "Validation failed", errors });
+      return res.status(400).json({ success: false, message: "Validation failed", errors });
     }
 
     const { firstName, lastName, username, email, password } = req.body;
@@ -33,11 +33,11 @@ export const SignUp = async (req, res) => {
 
     await newUser.save();
 
-    return res.status(201).json({ message: "User Created Successfully" });
+    return res.status(201).json({ status: true, message: "User Created Successfully" });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
+      .json({ success: false, message: "Internal Server Error", error: error.message });
   }
 };
 
@@ -45,9 +45,9 @@ export const Login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || validator.isEmpty(username.trim())) {
-      return res.status(400).json({ message: "Email is required" });
-    } else if (!password || validator.isEmpty(password.trim())) {
+    if (!username) {
+      return res.status(400).json({ message: "Username is required" });
+    } else if (!password) {
       return res.status(400).json({ message: "Password is required" });
     }
 
@@ -59,7 +59,7 @@ export const Login = async (req, res) => {
       query.username = username;
     }
 
-    const user = await UserModel.findOne(query);
+    const user = await UserModel.findOne(query).select("+password");;
 
     if (!user) {
       return res.status(400).json({ message: "Invalid Email or Password" });
