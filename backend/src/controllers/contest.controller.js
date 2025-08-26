@@ -1,35 +1,53 @@
 import ContestModal from "../model/ContestModal.js";
+import ValidateCreateContestData from "../utils/ValidateCreateContestData.js";
 
 export const createContest = async (req, res) => {
-    try {
-        const { roomName, numberOfQuestions, timePerQuestion } = req.body
+  try {
+    const { isValid, errors } = ValidateCreateContestData(req);
 
-        if (!roomName || !numberOfQuestions || !timePerQuestion) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
-        const newRoom = new ContestModal({
-            roomName,
-            // createdBy: req.user._id,
-            numberOfQuestions,
-            timePerQuestion,
-        })
-        await newRoom.save();
-        res.status(201).json({
-            message: "Contest created successfully",
-            newRoom,
-        });
-    } catch (error) {
-        if (error.name === "ValidationError") {
-            let messages = Object.values(error.errors).map(val => val.message);
-
-            return res.status(400).json({
-                success: false,
-                message: messages[0]
-            });
-        }
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong! Please try again later."
-        });
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "InValid Data",
+        errors,
+      });
     }
-}
+
+    const { contestName, numberOfQuestions, totalParticipants, status } =
+      req.body;
+
+    const createdBy = req.user?._id;
+
+    if (!createdBy) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const newContest = new ContestModal({
+      contestName,
+      numberOfQuestions,
+      totalParticipants,
+      status,
+      createdBy,
+    });
+
+    console.log(newContest);
+
+    await newContest.save();
+
+    
+
+    return res.status(201).json({
+      success: true,
+      message: "Contest created successfully",
+      contest: newContest,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+};

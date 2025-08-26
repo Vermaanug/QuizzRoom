@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const contestSchema = new mongoose.Schema(
   {
@@ -21,13 +22,6 @@ const contestSchema = new mongoose.Schema(
       min: [1, "At least 1 participant required"],
       max: [50, "Maximum 50 participants allowed"],
     },
-    timePerQuestion: {
-      type: Number,
-      required: [true, "Time per question is required"],
-      min: [10, "Minimum 10 seconds per question"],
-      max: [300, "Maximum 5 minutes per question"],
-      default: 30,
-    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -41,26 +35,24 @@ const contestSchema = new mongoose.Schema(
       },
       default: "draft",
     },
-    startedAt: {
-      type: Date,
-    },
     shareableLink: {
       type: String,
       unique: true,
       sparse: true,
-    },
-    currentParticipants: {
-      type: Number,
-      default: 0,
-      max: function () {
-        return this?.totalParticipants;
-      },
     },
   },
   {
     timestamps: true,
   }
 );
+
+contestSchema.pre("save", function (next) {
+  if (!this.shareableLink) {
+    const token = crypto.randomBytes(16).toString("hex");
+    this.shareableLink = `${process.env.BASE_URL}/contest/${token}`
+  }
+  next();
+});
 
 const ContestModel = mongoose.model("Contest", contestSchema);
 
