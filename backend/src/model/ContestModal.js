@@ -40,19 +40,16 @@ const contestSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    questionsAdded: {
+      type: Boolean,
+      default: false
+    },
   },
   {
     timestamps: true,
   }
 );
 
-contestSchema.pre("save", function (next) {
-  if (!this.shareableLink) {
-    const token = crypto.randomBytes(16).toString("hex");
-    this.shareableLink = `${process.env.BASE_URL}/contest/${token}`
-  }
-  next();
-});
 
 const ContestModel = mongoose.model("Contest", contestSchema);
 
