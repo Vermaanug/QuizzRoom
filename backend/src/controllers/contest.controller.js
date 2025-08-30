@@ -121,3 +121,32 @@ export const addQuestions = async (req, res) => {
     });
   }
 };
+
+export const getAllContest = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not found",
+      });
+    }
+
+    const allContest = await ContestModal.find({ createdBy: userId }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Contests fetched successfully",
+      count: allContest.length,
+      contests: allContest,
+    });
+  } catch (error) {
+   
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
