@@ -29,7 +29,7 @@
   }
 
   .auth-input {
-    @apply h-12 w-full rounded-xl border bg-white px-4 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-100;
+    @apply h-12 w-full rounded-xl border bg-white px-4 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-primary-500;
   }
 
   .auth-button {
