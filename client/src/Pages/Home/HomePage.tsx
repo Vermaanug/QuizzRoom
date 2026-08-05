@@ -11,7 +11,12 @@ const leaderboard = [
   { rank: 3, name: "Ava Sharma", points: "8,760", initials: "AS", color: "bg-orange-100 text-orange-700" },
 ];
 
-const HomePage = () => (
+const HomePage = () => {
+  const { data } = useCurrentUser();
+  const user = data?.user;
+  const initials = `${user?.firstName?.[0] || "Q"}${user?.lastName?.[0] || "R"}`.toUpperCase();
+
+  return (
   <div className="min-h-screen bg-canvas">
     <header className="border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -26,7 +31,7 @@ const HomePage = () => (
         </nav>
         <div className="flex items-center gap-3">
           <button aria-label="Notifications" className="flex h-10 w-10 items-center justify-center rounded-xl border bg-white text-lg text-muted transition hover:border-primary-100 hover:text-primary-600">♢</button>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-sm font-bold text-primary-700">AV</div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-sm font-bold text-primary-700" title={user?.username}>{initials}</div>
         </div>
       </div>
     </header>
@@ -100,6 +105,8 @@ const HomePage = () => (
       </div>
     </main>
   </div>
-);
+  );
+};
 
 export default HomePage;
+import useCurrentUser from "#src/hooks/useCurrentUser";

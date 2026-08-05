@@ -86,3 +86,16 @@ export const Login = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
+export const GetCurrentUser = async (req, res) => {
+  return res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      username: req.user.username,
+      email: req.user.email,
+    },
+  });
+};

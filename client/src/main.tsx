@@ -8,8 +8,7 @@ import { Toaster } from 'react-hot-toast'
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: false },
-    mutations: { retry: 0 },
+    queries: { retry: 0, refetchOnWindowFocus: false },
   },
 })
 

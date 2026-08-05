@@ -1,7 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import AuthHeader from "./AuthHeader";
 import TextInput from "#src/component/Form/TextInput";
 import Button from "#src/component/Button/Button";
@@ -12,6 +13,7 @@ import { loginSchema, type LoginFormValues } from "./auth.schema";
 
 const LoginPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const signupMessage = (location.state as { message?: string } | null)?.message;
   const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -26,7 +28,9 @@ const LoginPage = () => {
   const onSubmit = async ({ username, password }: LoginFormValues) => {
     clearErrors("root.server");
     try {
-      await loginMutation.mutateAsync({ username, password });
+      const response = await loginMutation.mutateAsync({ username, password });
+      toast.success(response.message || "Login successful");
+      navigate("/home", { replace: true });
     } catch (error) {
       setError("root.server", { message: getApiError(error, "Unable to sign in. Please try again.").message });
     }
@@ -37,7 +41,6 @@ const LoginPage = () => {
       <AuthHeader eyebrow="Welcome back" title="Sign in to your account" description="Continue your quiz journey and see how high you can climb." />
       <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         {signupMessage && <FormAlert message={signupMessage} variant="success" />}
-        {loginMutation.isSuccess && !errors.root?.server && <FormAlert message={loginMutation.data.message} variant="success" />}
         {errors.root?.server?.message && <FormAlert message={errors.root.server.message} />}
         <TextInput id="login-identifier" label="Username or email" autoComplete="username" placeholder="you@example.com" registration={register("username")} error={errors.username?.message} />
         <div>
