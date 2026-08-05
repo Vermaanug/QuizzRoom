@@ -1,7 +1,6 @@
 import ValidateSignUpData from "../utils/ValidateSignUpData.js";
 import UserModel from "../model/UserModel.js";
 import jwt from "jsonwebtoken";
-import validator from "validator";
 
 export const SignUp = async (req, res) => {
   try {
@@ -74,8 +73,13 @@ export const Login = async (req, res) => {
       expiresIn: "8h",
     });
 
-    res.cookie("token", token, { httpOnly: true });
-    return res.json({ message: "Login successful" });
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 8 * 60 * 60 * 1000,
+    });
+    return res.json({ success: true, message: "Login successful" });
   } catch (error) {
     res
       .status(500)

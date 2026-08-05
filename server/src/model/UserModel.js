@@ -49,13 +49,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.validatePassword = async function (password) {
-  const isPasswordCorrect = await bcryptjs.compare(password, this.password);
-
-  if (!isPasswordCorrect) {
-    throw new Error("Invalid credentials");
-  }
-
-  return isPasswordCorrect;
+  return bcryptjs.compare(password, this.password);
 };
 
 
