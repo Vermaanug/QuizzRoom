@@ -3,6 +3,7 @@ import LoginPage from "./Pages/Auth/LoginPage";
 import AuthLayout from "./Pages/Auth/AuthLayout";
 import SignupPage from "./Pages/Auth/SignupPage";
 import ForgotPasswordPage from "./Pages/Auth/ForgotPasswordPage";
+import HomePage from "./Pages/Home/HomePage";
 
 // Define your routes here
 export const router = createBrowserRouter([
@@ -31,5 +32,9 @@ export const router = createBrowserRouter([
         element: <ForgotPasswordPage />,
       },
     ],
+  },
+  {
+    path: "/home",
+    element: <HomePage />,
   },
 ]);
