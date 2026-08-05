@@ -4,7 +4,7 @@ interface IPageWrapperProps {
 }
 
 const PageWrapper: React.FC<IPageWrapperProps> = ({ className, children }) => (
-  <div className={`w-full h-full px-4 py-6 ${className ?? ""}`}>
+  <div className={`min-h-screen w-full ${className ?? ""}`}>
     {children}
   </div>
 );

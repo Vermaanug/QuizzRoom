@@ -1,3 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html {
+    @apply bg-canvas;
+  }
+
+  body {
+    @apply m-0 min-w-[320px] bg-canvas font-sans text-ink antialiased;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .auth-label {
+    @apply mb-2 block text-sm font-semibold text-ink;
+  }
+
+  .auth-input {
+    @apply h-12 w-full rounded-xl border bg-white px-4 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-100;
+  }
+
+  .auth-button {
+    @apply flex h-12 w-full items-center justify-center rounded-xl bg-primary-600 px-5 text-sm font-bold text-white shadow-button transition hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+}

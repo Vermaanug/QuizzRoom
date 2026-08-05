@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "./Pages/Auth/LoginPage";
 import AuthLayout from "./Pages/Auth/AuthLayout";
+import SignupPage from "./Pages/Auth/SignupPage";
+import ForgotPasswordPage from "./Pages/Auth/ForgotPasswordPage";
 
 // Define your routes here
 export const router = createBrowserRouter([
@@ -22,11 +24,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "signup",
-        element: <LoginPage />,
+        element: <SignupPage />,
       },
       {
         path: "forgot-password",
-        element: <LoginPage />,
+        element: <ForgotPasswordPage />,
       },
     ],
   },
