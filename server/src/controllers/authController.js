@@ -3,6 +3,13 @@ import validateSignUpData from "../utils/validateSignUpData.js";
 import UserModel from "../models/userModel.js";
 import AppError from "../errors/appError.js";
 
+const authCookieOptions = {
+  httpOnly: true,
+  path: "/",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: process.env.NODE_ENV === "production",
+};
+
 export const signUp = async (req, res) => {
   const { isValid, errors } = validateSignUpData(req);
 
@@ -55,13 +62,20 @@ export const login = async (req, res) => {
   });
 
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
+    ...authCookieOptions,
     maxAge: 8 * 60 * 60 * 1000,
   });
 
   return res.json({ success: true, message: "Login successful" });
+};
+
+export const logout = async (req, res) => {
+  res.clearCookie("token", authCookieOptions);
+
+  return res.json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
 export const getCurrentUser = async (req, res) => {
