@@ -10,36 +10,3 @@
   body { @apply m-0 min-w-[320px] bg-canvas font-sans text-ink antialiased; }
   button, input { font: inherit; }
 }
-
-@layer components {
-  .brand { @apply items-center gap-1 font-display text-[23px] uppercase tracking-[-0.03em] text-ink; }
-  .brand span, .brand b { @apply text-primary-500; }
-  .brand b { @apply ml-1 text-2xl not-italic; }
-  .site-header { @apply flex h-[82px] items-center justify-between border-b px-5 sm:px-10; }
-  .nav-link { @apply font-display text-base uppercase tracking-[0.12em] text-muted transition hover:text-ink; }
-  .neon-button { @apply inline-flex items-center justify-center gap-3 bg-primary-500 font-display uppercase tracking-[0.1em] text-black shadow-button transition hover:bg-primary-100; }
-  .outline-button { @apply inline-flex items-center justify-center gap-3 border font-display uppercase tracking-[0.1em] text-ink transition hover:border-muted; }
-  .hero-shell { @apply mx-auto flex min-h-[640px] max-w-3xl flex-col items-center px-5 pb-14 pt-16 text-center; }
-  .live-badge { @apply inline-flex items-center gap-2 border border-primary-700 bg-primary-500/10 px-5 py-2 font-display text-sm uppercase tracking-[0.09em] text-primary-500; }
-  .hero-title { @apply mt-10 flex flex-col font-display text-[70px] uppercase leading-[0.91] tracking-[-0.025em] sm:text-[100px]; }
-  .hero-copy { @apply mt-7 text-base leading-7 text-muted sm:text-lg; }
-  .join-panel { @apply mt-14 w-full max-w-[580px] border bg-[#171717] p-5 text-left; }
-  .join-panel label { @apply font-display uppercase tracking-[0.12em] text-muted; }
-  .join-panel input { @apply h-12 min-w-0 flex-1 border bg-[#202020] px-4 text-sm text-ink outline-none placeholder:text-muted focus:border-primary-700; }
-  .join-panel button { @apply w-16 shrink-0 bg-primary-700 text-2xl text-black transition hover:bg-primary-500; }
-  .stats-grid { @apply grid border-y md:grid-cols-3; }
-  .stat { @apply flex min-h-28 flex-col items-center justify-center border-b md:border-b-0 md:border-r last:border-0; }
-  .stat strong { @apply font-display text-4xl text-primary-500; }
-  .stat span { @apply mt-1 text-sm text-muted; }
-  .help-button { @apply fixed bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-2xl text-black shadow-lg; }
-  .auth-page { @apply flex min-h-screen items-start justify-center bg-canvas px-5 py-12 sm:py-16; }
-  .auth-shell { @apply w-full max-w-[540px]; }
-  .auth-label { @apply mb-2 block font-display text-sm uppercase tracking-[0.12em] text-muted; }
-  .auth-input { @apply h-14 w-full border bg-surface px-5 text-base text-ink outline-none transition placeholder:text-muted focus:border-primary-700; }
-  .auth-button { @apply flex h-14 w-full items-center justify-center bg-primary-500 px-5 font-display text-base uppercase tracking-[0.12em] text-black shadow-button transition hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-700 disabled:cursor-not-allowed disabled:opacity-60; }
-}
-
-@media (max-width: 640px) {
-  .brand { font-size: 20px; }
-  .hero-shell { padding-top: 50px; }
-}

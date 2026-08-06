@@ -25,14 +25,14 @@ const TextInput = ({
 
   return (
     <div>
-      {label && <label className="auth-label" htmlFor={id}>{label}</label>}
+      {label && <label className="mb-2 block font-display text-sm uppercase tracking-[0.12em] text-muted" htmlFor={id}>{label}</label>}
       <div className="relative">
         <input
           {...registration}
           aria-describedby={error ? `${id}-error` : undefined}
           aria-invalid={Boolean(error)}
           autoComplete={autoComplete}
-          className={`auth-input ${isPassword ? "pr-16" : ""} ${error ? "border-danger focus:border-danger " : ""}`}
+          className={`h-14 w-full border bg-surface px-5 text-base text-ink outline-none transition placeholder:text-muted focus:border-primary-700 ${isPassword ? "pr-16" : ""} ${error ? "border-danger focus:border-danger " : ""}`}
           id={id}
           placeholder={placeholder}
           type={isPassword && showPassword ? "text" : type}

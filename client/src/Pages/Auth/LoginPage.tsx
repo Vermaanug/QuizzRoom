@@ -45,7 +45,7 @@ const LoginPage = () => {
         <TextInput id="login-identifier" label="Username or email" autoComplete="username" placeholder="you@example.com" registration={register("username")} error={errors.username?.message} />
         <div>
           <div className="flex items-center justify-between">
-            <label className="auth-label" htmlFor="login-password">Password</label>
+            <label className="mb-2 block font-display text-sm uppercase tracking-[0.12em] text-muted" htmlFor="login-password">Password</label>
             <Link className="mb-2 text-xs font-bold text-primary-600 hover:text-primary-700" to="/auth/forgot-password">Forgot password?</Link>
           </div>
           <TextInput id="login-password" label="" type="password" autoComplete="current-password" placeholder="••••••••" registration={register("password")} error={errors.password?.message} />
