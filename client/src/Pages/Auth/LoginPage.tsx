@@ -38,7 +38,7 @@ const LoginPage = () => {
 
   return (
     <>
-      <AuthHeader eyebrow="Welcome back" title="Sign in to your account" description="Continue your quiz journey and see how high you can climb." />
+      <AuthHeader eyebrow="Account login" title="Welcome back" description="Sign in to your host dashboard." />
       <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         {signupMessage && <FormAlert message={signupMessage} variant="success" />}
         {errors.root?.server?.message && <FormAlert message={errors.root.server.message} />}
@@ -48,16 +48,16 @@ const LoginPage = () => {
             <label className="auth-label" htmlFor="login-password">Password</label>
             <Link className="mb-2 text-xs font-bold text-primary-600 hover:text-primary-700" to="/auth/forgot-password">Forgot password?</Link>
           </div>
-          <TextInput id="login-password" label="" type="password" autoComplete="current-password" placeholder="Enter your password" registration={register("password")} error={errors.password?.message} />
+          <TextInput id="login-password" label="" type="password" autoComplete="current-password" placeholder="••••••••" registration={register("password")} error={errors.password?.message} />
         </div>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
+        <label className="hidden cursor-pointer items-center gap-2 text-sm text-muted">
           <input className="h-4 w-4 rounded border-line text-primary-600 focus:ring-primary-500" type="checkbox" {...register("remember")} />
           Keep me signed in
         </label>
         <Button loading={loginMutation.isPending} type="submit">Sign in</Button>
       </form>
       <p className="mt-7 text-center text-sm text-muted">
-        New to QuizzRoom? <Link className="font-bold text-primary-600 hover:text-primary-700" to="/auth/signup">Create an account</Link>
+        No account? <Link className="font-semibold text-primary-500 hover:text-primary-600" to="/auth/signup">Sign up</Link>
       </p>
     </>
   );

@@ -40,7 +40,7 @@ const SignupPage = () => {
   };
 
   return <>
-    <AuthHeader eyebrow="Join the room" title="Create your account" description="Set up your profile and start challenging your friends in minutes." />
+    <AuthHeader eyebrow="Join Quiz Room" title="Create account" description="Start hosting quizzes for free." />
     <form className="space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
       {errors.root?.server?.message && <FormAlert message={errors.root.server.message} />}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -57,8 +57,8 @@ const SignupPage = () => {
       {errors.acceptTerms && <p className="text-xs font-medium text-danger" role="alert">{errors.acceptTerms.message}</p>}
       <Button loading={signupMutation.isPending} type="submit">Create account</Button>
     </form>
-    <p className="mt-7 text-center text-sm text-muted">
-      Already have an account? <Link className="font-bold text-primary-600 hover:text-primary-700" to="/auth/login">Sign in</Link>
+    <p className="mt-7 text-center text-base text-muted">
+      Already have one? <Link className="font-semibold text-primary-500 hover:text-primary-600" to="/auth/login">Sign in</Link>
     </p>
   </>;
 };
