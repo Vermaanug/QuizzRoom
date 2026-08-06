@@ -5,7 +5,8 @@ import authRouter from "./route/auth.route.js";
 import contestRouter from "./route/contest.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { notFound } from "./middleware/notFound.js";
+import notFound from "./middleware/not-found.js";
+import errorHandler from "./middleware/error-handler.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/contest", contestRouter);
 
 app.use(notFound);
+app.use(errorHandler);
 
 ConnectDB()
   .then(() => {
