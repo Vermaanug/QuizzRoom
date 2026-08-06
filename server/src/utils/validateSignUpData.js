@@ -1,6 +1,6 @@
 import validator from "validator"
 
-const ValidateSignUpData = (req) => {
+const validateSignUpData = (req) => {
     const { firstName = "", lastName = "", username = "", email = "", password = "" } = req.body;
 
     const errors = {};
@@ -41,6 +41,5 @@ const ValidateSignUpData = (req) => {
     };
 };
 
-export default ValidateSignUpData;
-
+export default validateSignUpData;
 

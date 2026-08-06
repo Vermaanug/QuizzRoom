@@ -1,12 +1,11 @@
 import "dotenv/config";
 import express from "express";
-import ConnectDB from "./db/ConnectDb.js";
-import authRouter from "./route/auth.route.js";
-import contestRouter from "./route/contest.route.js";
+import connectDb from "./db/connectDb.js";
+import authRouter from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import notFound from "./middleware/not-found.js";
-import errorHandler from "./middleware/error-handler.js";
+import notFound from "./middleware/notFound.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -20,12 +19,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
-app.use("/api/contest", contestRouter);
 
 app.use(notFound);
 app.use(errorHandler);
 
-ConnectDB()
+connectDb()
   .then(() => {
     app.listen(process.env.PORT || 3000, () => {
       console.log(`Server is running on port ${process.env.PORT || 3000}`);
