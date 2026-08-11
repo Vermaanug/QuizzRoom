@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node ./src/server.js",
     "dev": "nodemon ./src/server.js"
   },
   "dependencies": {
@@ -13,7 +13,7 @@
     "dotenv": "^17.2.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.1",
+    "pg": "^8.23.0",
     "validator": "^13.15.15"
   },
   "devDependencies": {

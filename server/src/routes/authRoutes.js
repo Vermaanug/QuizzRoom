@@ -1,22 +1,22 @@
-import express from "express";
-import {
-  getCurrentUser,
-  login,
-  logout,
-  signUp,
-} from "../controllers/authController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
-import asyncHandler from "../middleware/asyncHandler.js";
+// import express from "express";
+// import {
+//   getCurrentUser,
+//   login,
+//   logout,
+//   signUp,
+// } from "../controllers/authController.js";
+// import authMiddleware from "../middleware/authMiddleware.js";
+// import asyncHandler from "../middleware/asyncHandler.js";
 
-const authRouter = express.Router();
+// const authRouter = express.Router();
 
-authRouter.post("/signup", asyncHandler(signUp));
-authRouter.post("/login", asyncHandler(login));
-authRouter.post("/logout", asyncHandler(logout));
-authRouter.get(
-  "/me",
-  asyncHandler(authMiddleware),
-  asyncHandler(getCurrentUser),
-);
+// authRouter.post("/signup", asyncHandler(signUp));
+// authRouter.post("/login", asyncHandler(login));
+// authRouter.post("/logout", asyncHandler(logout));
+// authRouter.get(
+//   "/me",
+//   asyncHandler(authMiddleware),
+//   asyncHandler(getCurrentUser),
+// );
 
-export default authRouter;
+// export default authRouter;
