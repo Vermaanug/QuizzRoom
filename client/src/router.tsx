@@ -4,12 +4,23 @@ import AuthLayout from "./Pages/Auth/AuthLayout";
 import SignupPage from "./Pages/Auth/SignupPage";
 import ForgotPasswordPage from "./Pages/Auth/ForgotPasswordPage";
 import HomePage from "./Pages/Home/HomePage";
+import ProtectedRoute from "./component/ProtectedRoute/ProtectedRoute";
+import DashboardPage from "./Pages/Dashboard/DashboardPage";
 
 // Define your routes here
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: "dashboard",
+        element: <DashboardPage />,
+      },
+    ],
   },
   {
     path: "/auth",
@@ -33,5 +44,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: "/home", element: <Navigate to="/" replace /> },
+  { path: "/home", element: <Navigate to="/dashboard" replace /> },
 ]);

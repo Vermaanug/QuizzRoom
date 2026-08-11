@@ -30,7 +30,7 @@ const LoginPage = () => {
     try {
       const response = await loginMutation.mutateAsync({ username, password });
       toast.success(response.message || "Login successful");
-      navigate("/home", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setError("root.server", { message: getApiError(error, "Unable to sign in. Please try again.").message });
     }
