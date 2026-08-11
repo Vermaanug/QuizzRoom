@@ -9,6 +9,9 @@ import FormAlert from "#src/component/Form/FormAlert";
 import { handleGlobalPostRequest } from "#src/services/apiRequest";
 import { getApiError } from "#src/utils/apiError";
 import { signupSchema, type SignupFormValues } from "./auth.schema";
+import URLS from "#src/config/constant/URLS";
+
+type SignupPayload = Omit<SignupFormValues, "acceptTerms">;
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -16,10 +19,10 @@ const SignupPage = () => {
     resolver: zodResolver(signupSchema),
     defaultValues: { firstName: "", lastName: "", username: "", email: "", password: "", acceptTerms: false },
   });
-  type SignupPayload = Omit<SignupFormValues, "acceptTerms">;
+  
   const signupMutation = useMutation({
     mutationFn: (data: SignupPayload) =>
-      handleGlobalPostRequest<{ status: boolean; message: string }, SignupPayload>({ url: "/api/auth/signup", data }),
+      handleGlobalPostRequest<{ status: boolean; message: string }, SignupPayload>({ url: URLS.SIGNUP, data }),
   });
 
   const onSubmit = async (formValues: SignupFormValues) => {

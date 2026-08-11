@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { handleGlobalGetRequestQuery } from "#src/services/apiRequest";
+import URLS from "#src/config/constant/URLS";
+import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 
 export interface CurrentUser {
   id: string;
@@ -15,9 +17,9 @@ interface CurrentUserResponse {
 }
 
 const useCurrentUser = () => useQuery({
-  queryKey: ["current-user"],
+  queryKey: [QUERY_KEYS.CURRENT_USER],
   queryFn: ({ signal }) => handleGlobalGetRequestQuery<CurrentUserResponse>({
-    url: "/api/auth/me",
+    url: URLS.CURRENT_USER,
     signal,
   }),
 });

@@ -10,6 +10,7 @@ import FormAlert from "#src/component/Form/FormAlert";
 import { handleGlobalPostRequest } from "#src/services/apiRequest";
 import { getApiError } from "#src/utils/apiError";
 import { loginSchema, type LoginFormValues } from "./auth.schema";
+import URLS from "#src/config/constant/URLS";
 
 const LoginPage = () => {
   const location = useLocation();
@@ -22,7 +23,7 @@ const LoginPage = () => {
   
   const loginMutation = useMutation({
     mutationFn: (data: Pick<LoginFormValues, "username" | "password">) =>
-      handleGlobalPostRequest<{ success: boolean; message: string }, typeof data>({ url: "/api/auth/login", data }),
+      handleGlobalPostRequest<{ success: boolean; message: string }, typeof data>({ url: URLS.LOGIN, data }),
   });
 
   const onSubmit = async ({ username, password }: LoginFormValues) => {
