@@ -22,22 +22,31 @@ model User {
 }
 
 model Quiz {
-  id            String     @id @default(uuid()) @db.Uuid
-  title         String     @db.VarChar(120)
-  slug          String     @unique @db.VarChar(140)
-  description   String?    @db.Text
-  status        QuizStatus @default(draft)
-  questionsCount Int       @default(0) @map("questions_count")
-  roomsPlayed   Int        @default(0) @map("rooms_played")
-  isArchived    Boolean    @default(false) @map("is_archived")
-  publishedAt   DateTime?  @map("published_at") @db.Timestamptz(6)
-  ownerId       String     @map("owner_id") @db.Uuid
-  owner         User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id            String      @id @default(uuid()) @db.Uuid
+  title         String      @db.VarChar(120)
+  status        QuizStatus   @default(draft)
+  ownerId       String      @map("owner_id") @db.Uuid
+  owner         User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  questions     Question[]
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([ownerId, status])
   @@map("quizzes")
+}
+
+model Question {
+  id          String   @id @default(uuid()) @db.Uuid
+  quizId      String   @map("quiz_id") @db.Uuid
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  prompt      String   @db.Text
+  position    Int      @default(0)
+  timeLimit   Int?     @map("time_limit")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([quizId, position])
+  @@map("questions")
 }
 
 enum QuizStatus {
