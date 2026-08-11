@@ -95,8 +95,8 @@ export const getCurrentUser = async (req, res) => {
     success: true,
     user: {
       id: req.user.id,
-      first_name: req.user.first_name,
-      last_name: req.user.last_name,
+      first_name: req.user.firstName,
+      last_name: req.user.lastName,
       username: req.user.username,
       email: req.user.email,
     },
