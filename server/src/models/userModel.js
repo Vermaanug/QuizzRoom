@@ -65,6 +65,7 @@ export const createUser = async ({
       lastName: lastName.trim(),
       username: username.trim(),
       email: normalizeEmail(email),
+      passwordHash,
     },
   });
 
