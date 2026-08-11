@@ -11,6 +11,7 @@ const mapUser = (user) => {
     lastName: user.lastName,
     username: user.username,
     email: user.email,
+    passwordHash: user.passwordHash,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
