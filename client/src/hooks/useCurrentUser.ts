@@ -3,8 +3,8 @@ import { handleGlobalGetRequestQuery } from "#src/services/apiRequest";
 
 export interface CurrentUser {
   id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   username: string;
   email: string;
 }

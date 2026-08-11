@@ -1,26 +1,21 @@
 import { Pool } from "pg";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not set");
+}
+
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl:
+    process.env.DATABASE_SSL === "true"
+      ? { rejectUnauthorized: false }
+      : undefined,
 });
-
-const createUsersTableQuery = `
-  CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    username VARCHAR(30) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  );
-`;
 
 export const connectDb = async () => {
   try {
-    await pool.query(createUsersTableQuery);
-    console.log("Connected to PostgreSQL and ensured schema");
+    await pool.query("SELECT 1");
+    console.log("Connected to PostgreSQL");
   } catch (error) {
     console.error("Error connecting to PostgreSQL:", error);
     throw error;
