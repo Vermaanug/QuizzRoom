@@ -36,16 +36,28 @@ model Quiz {
 }
 
 model Question {
-  id          String   @id @default(uuid()) @db.Uuid
-  quizId      String   @map("quiz_id") @db.Uuid
-  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  prompt      String   @db.Text
-  position    Int      @default(0)
-  timeLimit   Int?     @map("time_limit")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id            String   @id @default(uuid()) @db.Uuid
 
-  @@index([quizId, position])
+  quizId        String   @map("quiz_id") @db.Uuid
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  text          String   @db.Text
+  codeSnippet   String?  @map("code_snippet") @db.Text
+
+  optionA       String   @map("option_a") @db.Text
+  optionB       String   @map("option_b") @db.Text
+  optionC       String   @map("option_c") @db.Text
+  optionD       String   @map("option_d") @db.Text
+
+  correctOption String   @map("correct_option")
+
+  timeLimitSeconds Int   @map("time_limit_seconds")
+  orderIndex       Int   @map("order_index")
+
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([quizId, orderIndex])
   @@map("questions")
 }
 
