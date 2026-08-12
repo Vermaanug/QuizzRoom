@@ -3,9 +3,9 @@ import useCurrentUser from "#src/hooks/useCurrentUser";
 
 const ProtectedRoute = () => {
   const location = useLocation();
-  const { data, isLoading, isError } = useCurrentUser();
+  const { service: { getCurrentUserService } } = useCurrentUser();
 
-  if (isLoading) {
+  if (getCurrentUserService.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas">
         <div className="text-center">
@@ -16,7 +16,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  if (isError || !data?.user) {
+  if (getCurrentUserService.isError || !getCurrentUserService.data?.user) {
     return <Navigate replace state={{ from: location.pathname }} to="/auth/login" />;
   }
 

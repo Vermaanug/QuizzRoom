@@ -1,11 +1,7 @@
-import { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Dropdown from "#src/component/Dropdown/Dropdown";
-import useCurrentUser from "#src/hooks/useCurrentUser";
-import { handleGlobalPostRequest } from "#src/services/apiRequest";
+import { useMemo } from "react";
 import NewQuizModal from "./component/NewQuizModal";
-import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
-import URLS from "#src/config/constant/URLS";
+import useDashboard from "./hook/useDashboard";
 
 type TabKey = "all" | "published" | "draft";
 
@@ -163,29 +159,17 @@ const formatDate = (value: string) =>
   }).format(new Date(value));
 
 const DashboardPage = () => {
-  const queryClient = useQueryClient();
-  const { data } = useCurrentUser();
-  const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
+  const {
+    states: { isNewQuizOpen, setIsNewQuizOpen },
+    services: { getCurrentUserService },
+    mutations: { logoutMutation },
+  } = useDashboard();
 
-  const currentUser = data?.user;
+  const currentUser = getCurrentUserService.data?.user;
   const displayName = useMemo(() => {
     if (!currentUser) return "Host";
     return `${currentUser.first_name} ${currentUser.last_name}`.trim();
   }, [currentUser]);
-
-  const logoutMutation = useMutation({
-    mutationFn: () =>
-      handleGlobalPostRequest<
-        { success: boolean; message: string },
-        Record<string, never>
-      >({
-        url: URLS.LOGOUT,
-        data: {},
-      }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CURRENT_USER] });
-    },
-  });
 
   return (
     <div className="min-h-screen bg-canvas text-ink">

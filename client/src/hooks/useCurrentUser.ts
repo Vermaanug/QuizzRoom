@@ -16,12 +16,21 @@ interface CurrentUserResponse {
   user: CurrentUser;
 }
 
-const useCurrentUser = () => useQuery({
-  queryKey: [QUERY_KEYS.CURRENT_USER],
-  queryFn: ({ signal }) => handleGlobalGetRequestQuery<CurrentUserResponse>({
-    url: URLS.CURRENT_USER,
-    signal,
-  }),
-});
+const useCurrentUser = () => {
+  const getCurrentUserService = useQuery({
+    queryKey: [QUERY_KEYS.CURRENT_USER],
+    queryFn: ({ signal }) =>
+      handleGlobalGetRequestQuery<CurrentUserResponse>({
+        url: URLS.CURRENT_USER,
+        signal,
+      }),
+  });
+
+  return {
+    service: {
+      getCurrentUserService,
+    },
+  };
+};
 
 export default useCurrentUser;
