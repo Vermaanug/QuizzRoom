@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   getCurrentUser,
   login,
@@ -8,7 +8,7 @@ import {
 import authMiddleware from "../middleware/authMiddleware.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
-const authRouter = express.Router();
+const authRouter: Router = express.Router();
 
 authRouter.post("/signup", asyncHandler(signUp));
 authRouter.post("/login", asyncHandler(login));
@@ -16,7 +16,7 @@ authRouter.post("/logout", asyncHandler(logout));
 authRouter.get(
   "/me",
   asyncHandler(authMiddleware),
-  asyncHandler(getCurrentUser),
+  asyncHandler(getCurrentUser)
 );
 
 export default authRouter;

@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -8,7 +8,7 @@ import {
   updateQuizHandler,
 } from "../controllers/quizController.js";
 
-const quizRouter = express.Router();
+const quizRouter: Router = express.Router();
 
 quizRouter.use(asyncHandler(authMiddleware));
 

@@ -1,3 +1,4 @@
+import { Response } from "express";
 import jwt from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
 import validateSignUpData from "../utils/validateSignUpData.js";
@@ -7,15 +8,23 @@ import {
   findUserForLogin,
 } from "../models/userModel.js";
 import AppError from "../errors/appError.js";
+import { AuthenticatedRequest } from "../types/index.js";
 
-const authCookieOptions = {
+interface AuthCookieOptions {
+  httpOnly: boolean;
+  path: string;
+  sameSite: "none" | "lax" | "strict";
+  secure: boolean;
+}
+
+const authCookieOptions: AuthCookieOptions = {
   httpOnly: true,
   path: "/",
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   secure: process.env.NODE_ENV === "production",
 };
 
-export const signUp = async (req, res) => {
+export const signUp = async (req: AuthenticatedRequest, res: Response) => {
   const { isValid, errors } = validateSignUpData(req);
 
   if (!isValid) {
@@ -29,35 +38,35 @@ export const signUp = async (req, res) => {
     throw new AppError(
       "Username or email already exists",
       409,
-      "USER_ALREADY_EXISTS",
+      "USER_ALREADY_EXISTS"
     );
   }
 
   try {
     await createUser({ firstName, lastName, username, email, password });
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === "23505") {
       throw new AppError(
         "Username or email already exists",
         409,
-        "USER_ALREADY_EXISTS",
+        "USER_ALREADY_EXISTS"
       );
     }
 
     throw error;
   }
 
-  return res.status(201).json({
+  res.status(201).json({
     success: true,
     message: "User created successfully",
   });
 };
 
-export const login = async (req, res) => {
+export const login = async (req: AuthenticatedRequest, res: Response) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    const errors = {};
+    const errors: Record<string, string> = {};
     if (!username) errors.username = "Username is required";
     if (!password) errors.password = "Password is required";
     throw new AppError("Validation failed", 400, "VALIDATION_ERROR", errors);
@@ -65,11 +74,18 @@ export const login = async (req, res) => {
 
   const user = await findUserForLogin(username);
 
-  if (!user || !(await bcryptjs.compare(password, user.passwordHash))) {
-    throw new AppError("Invalid username or password", 401, "INVALID_CREDENTIALS");
+  if (
+    !user ||
+    !(await bcryptjs.compare(password, user.passwordHash))
+  ) {
+    throw new AppError(
+      "Invalid username or password",
+      401,
+      "INVALID_CREDENTIALS"
+    );
   }
 
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY, {
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY as string, {
     expiresIn: "8h",
   });
 
@@ -78,27 +94,30 @@ export const login = async (req, res) => {
     maxAge: 8 * 60 * 60 * 1000,
   });
 
-  return res.json({ success: true, message: "Login successful" });
+  res.json({ success: true, message: "Login successful" });
 };
 
-export const logout = async (req, res) => {
+export const logout = async (req: AuthenticatedRequest, res: Response) => {
   res.clearCookie("token", authCookieOptions);
 
-  return res.json({
+  res.json({
     success: true,
     message: "Logged out successfully",
   });
 };
 
-export const getCurrentUser = async (req, res) => {
-  return res.json({
+export const getCurrentUser = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  res.json({
     success: true,
     user: {
-      id: req.user.id,
-      first_name: req.user.firstName,
-      last_name: req.user.lastName,
-      username: req.user.username,
-      email: req.user.email,
+      id: req.user?.id,
+      first_name: req.user?.firstName,
+      last_name: req.user?.lastName,
+      username: req.user?.username,
+      email: req.user?.email,
     },
   });
 };

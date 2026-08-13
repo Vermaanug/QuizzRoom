@@ -1,12 +1,13 @@
+import { Request, Response, NextFunction } from "express";
 import AppError from "../errors/appError.js";
 
-const notFound = (req, res, next) => {
+const notFound = (req: Request, res: Response, next: NextFunction): void => {
   next(
     new AppError(
       `Route not found: ${req.method} ${req.originalUrl}`,
       404,
-      "ROUTE_NOT_FOUND",
-    ),
+      "ROUTE_NOT_FOUND"
+    )
   );
 };
 

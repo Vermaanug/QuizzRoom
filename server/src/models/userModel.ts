@@ -1,8 +1,9 @@
 import bcryptjs from "bcryptjs";
 import { randomUUID } from "crypto";
 import { prisma } from "../db/prisma.js";
+import { MappedUser } from "../types/index.js";
 
-const mapUser = (user) => {
+const mapUser = (user: any): MappedUser | null => {
   if (!user) return null;
 
   return {
@@ -17,9 +18,13 @@ const mapUser = (user) => {
   };
 };
 
-const normalizeEmail = (email) => email.trim().toLowerCase();
+const normalizeEmail = (email: string): string =>
+  email.trim().toLowerCase();
 
-export const findUserByUsernameOrEmail = async (username, email) => {
+export const findUserByUsernameOrEmail = async (
+  username: string,
+  email: string
+): Promise<MappedUser | null> => {
   const user = await prisma.user.findFirst({
     where: {
       OR: [{ username: username.trim() }, { email: normalizeEmail(email) }],
@@ -29,7 +34,9 @@ export const findUserByUsernameOrEmail = async (username, email) => {
   return mapUser(user);
 };
 
-export const findUserForLogin = async (identifier) => {
+export const findUserForLogin = async (
+  identifier: string
+): Promise<MappedUser | null> => {
   const trimmedIdentifier = identifier.trim();
   const isEmail = trimmedIdentifier.includes("@");
 
@@ -42,7 +49,7 @@ export const findUserForLogin = async (identifier) => {
   return mapUser(user);
 };
 
-export const findUserById = async (id) => {
+export const findUserById = async (id: string): Promise<MappedUser | null> => {
   const user = await prisma.user.findUnique({
     where: { id },
   });
@@ -56,7 +63,13 @@ export const createUser = async ({
   username,
   email,
   password,
-}) => {
+}: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  password: string;
+}): Promise<MappedUser> => {
   const passwordHash = await bcryptjs.hash(password, 10);
 
   const user = await prisma.user.create({
@@ -70,5 +83,5 @@ export const createUser = async ({
     },
   });
 
-  return mapUser(user);
+  return mapUser(user)!;
 };

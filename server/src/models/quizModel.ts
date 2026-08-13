@@ -1,7 +1,8 @@
 import { prisma } from "../db/prisma.js";
 import AppError from "../errors/appError.js";
+import { MappedQuiz, UpdateQuizRequest } from "../types/index.js";
 
-const mapQuiz = (quiz) => {
+const mapQuiz = (quiz: any): MappedQuiz | null => {
   if (!quiz) return null;
 
   return {
@@ -14,7 +15,15 @@ const mapQuiz = (quiz) => {
   };
 };
 
-export const createQuiz = async ({ ownerId, title, status = "draft" }) => {
+export const createQuiz = async ({
+  ownerId,
+  title,
+  status = "draft",
+}: {
+  ownerId: string;
+  title: string;
+  status?: "draft" | "published" | "archived";
+}): Promise<MappedQuiz> => {
   const quiz = await prisma.quiz.create({
     data: {
       ownerId,
@@ -23,10 +32,10 @@ export const createQuiz = async ({ ownerId, title, status = "draft" }) => {
     },
   });
 
-  return mapQuiz(quiz);
+  return mapQuiz(quiz)!;
 };
 
-export const findQuizById = async (id) => {
+export const findQuizById = async (id: string): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findUnique({
     where: { id },
   });
@@ -34,7 +43,10 @@ export const findQuizById = async (id) => {
   return mapQuiz(quiz);
 };
 
-export const findQuizByIdAndOwner = async (id, ownerId) => {
+export const findQuizByIdAndOwner = async (
+  id: string,
+  ownerId: string
+): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
   });
@@ -42,16 +54,22 @@ export const findQuizByIdAndOwner = async (id, ownerId) => {
   return mapQuiz(quiz);
 };
 
-export const findQuizzesByOwner = async (ownerId) => {
+export const findQuizzesByOwner = async (
+  ownerId: string
+): Promise<MappedQuiz[]> => {
   const quizzes = await prisma.quiz.findMany({
     where: { ownerId },
     orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
   });
 
-  return quizzes.map(mapQuiz);
+  return quizzes.map(mapQuiz).filter((q) => q !== null) as MappedQuiz[];
 };
 
-export const updateQuizByIdAndOwner = async (id, ownerId, data) => {
+export const updateQuizByIdAndOwner = async (
+  id: string,
+  ownerId: string,
+  data: UpdateQuizRequest
+): Promise<MappedQuiz> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
   });
@@ -68,10 +86,13 @@ export const updateQuizByIdAndOwner = async (id, ownerId, data) => {
     },
   });
 
-  return mapQuiz(updatedQuiz);
+  return mapQuiz(updatedQuiz)!;
 };
 
-export const deleteQuizByIdAndOwner = async (id, ownerId) => {
+export const deleteQuizByIdAndOwner = async (
+  id: string,
+  ownerId: string
+): Promise<void> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
   });
@@ -83,6 +104,4 @@ export const deleteQuizByIdAndOwner = async (id, ownerId) => {
   await prisma.quiz.delete({
     where: { id: quiz.id },
   });
-
-  return mapQuiz(quiz);
 };

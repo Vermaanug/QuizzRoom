@@ -1,3 +1,4 @@
+import { Response } from "express";
 import AppError from "../errors/appError.js";
 import validateQuizData from "../utils/validateQuizData.js";
 import {
@@ -6,13 +7,17 @@ import {
   findQuizzesByOwner,
   updateQuizByIdAndOwner,
 } from "../models/quizModel.js";
+import { AuthenticatedRequest } from "../types/index.js";
 
-const normalizeQuizBody = (body) => ({
+const normalizeQuizBody = (body: any) => ({
   title: body.title,
   status: body.status,
 });
 
-export const createQuizHandler = async (req, res) => {
+export const createQuizHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   const { isValid, errors } = validateQuizData(req);
 
   if (!isValid) {
@@ -21,12 +26,12 @@ export const createQuizHandler = async (req, res) => {
 
   try {
     const quiz = await createQuiz({
-      ownerId: req.user.id,
+      ownerId: req.user?.id as string,
       ...normalizeQuizBody(req.body),
       status: req.body.status || "draft",
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Quiz created successfully",
       quiz,
@@ -36,16 +41,22 @@ export const createQuizHandler = async (req, res) => {
   }
 };
 
-export const getQuizzesHandler = async (req, res) => {
-  const quizzes = await findQuizzesByOwner(req.user.id);
+export const getQuizzesHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const quizzes = await findQuizzesByOwner(req.user?.id as string);
 
-  return res.json({
+  res.json({
     success: true,
     quizzes,
   });
 };
 
-export const updateQuizHandler = async (req, res) => {
+export const updateQuizHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   const { isValid, errors } = validateQuizData(req, { partial: true });
 
   if (!isValid) {
@@ -55,11 +66,11 @@ export const updateQuizHandler = async (req, res) => {
   try {
     const quiz = await updateQuizByIdAndOwner(
       req.params.id,
-      req.user.id,
-      normalizeQuizBody(req.body),
+      req.user?.id as string,
+      normalizeQuizBody(req.body)
     );
 
-    return res.json({
+    res.json({
       success: true,
       message: "Quiz updated successfully",
       quiz,
@@ -69,10 +80,13 @@ export const updateQuizHandler = async (req, res) => {
   }
 };
 
-export const deleteQuizHandler = async (req, res) => {
-  await deleteQuizByIdAndOwner(req.params.id, req.user.id);
+export const deleteQuizHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  await deleteQuizByIdAndOwner(req.params.id, req.user?.id as string);
 
-  return res.json({
+  res.json({
     success: true,
     message: "Quiz deleted successfully",
   });
