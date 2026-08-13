@@ -11,7 +11,7 @@ interface Quiz {
   updatedAt: string;
 }
 
-const useGetAllQuizzesService = () => {
+export const useGetAllQuizzesService = () => {
   const getAllQuizzesService = useQuery({
     queryKey: [QUERY_KEYS.QUIZZES],
     queryFn: () =>
@@ -27,4 +27,20 @@ const useGetAllQuizzesService = () => {
   };
 };
 
-export default useGetAllQuizzesService;
+export const useGetSingleQuizService = ({ quizId }: { quizId: string }) => {
+  const getSingleQuizService = useQuery({
+    queryKey: [QUERY_KEYS.QUIZZES, quizId],
+    queryFn: () =>
+      handleGlobalGetRequestQuery<{ quiz: Quiz }>({
+        url: `${URLS.QUIZZES}/${quizId}`,
+      }),
+    enabled: !!quizId,
+  });
+
+  return {
+    services: {
+      getSingleQuizService,
+    },
+  };
+};
+

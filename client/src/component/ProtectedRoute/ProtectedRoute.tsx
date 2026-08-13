@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import useCurrentUser from "#src/hooks/useCurrentUser";
+import useCurrentUser from "#src/services/user/useCurrentUser";
 
 const ProtectedRoute = () => {
   const location = useLocation();

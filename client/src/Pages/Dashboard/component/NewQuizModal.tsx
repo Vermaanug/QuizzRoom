@@ -2,6 +2,9 @@ import { useForm } from "react-hook-form";
 import Button from "#src/component/Button/Button";
 import TextInput from "#src/component/Form/TextInput";
 import Modal from "#src/component/Modal/Modal";
+import { useGetSingleQuizService } from "#src/services/quizzes/useQuizzeServices";
+import { useEffect } from "react";
+import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
 interface NewQuizFormValues {
   title: string;
@@ -25,6 +28,12 @@ const NewQuizModal = ({ isOpen, handleClose , onCreate }: NewQuizModalProps) => 
     },
   });
 
+  const {urlQueries } = useGlobalRoutesHandler()
+
+  const quizId = urlQueries?.["quizId"]
+
+  const { services: { getSingleQuizService } } = useGetSingleQuizService({ quizId: quizId });
+
   const closeModal = () => {
     reset();
     handleClose();
@@ -34,6 +43,14 @@ const NewQuizModal = ({ isOpen, handleClose , onCreate }: NewQuizModalProps) => 
     await onCreate(values);
     closeModal();
   });
+
+  useEffect(() => {
+    if (getSingleQuizService.data?.quiz) {
+      reset({
+        title: getSingleQuizService.data.quiz.title,
+      });
+    }
+  }, [getSingleQuizService.data?.quiz]);
 
   return (
     <Modal

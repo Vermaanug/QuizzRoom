@@ -62,6 +62,7 @@ const DashboardPage = () => {
     services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
     functions: { handleCreateQuiz, handleDeleteQuiz },
+    route: {navigateTo}
   } = useDashboard();
 
   const currentUser = getCurrentUserService.data?.user;
@@ -232,7 +233,7 @@ const DashboardPage = () => {
 
         <section className="mt-6 grid gap-4 xl:grid-cols-3">
           {getAllQuizzesService.data?.quizzes?.map((quiz) => (
-            <article
+            <div
               className="group rounded-xl border border-line bg-surface p-4 shadow-card transition hover:-translate-y-1 hover:border-primary-700/60"
               key={quiz.id}
             >
@@ -283,6 +284,14 @@ const DashboardPage = () => {
                   <button
                     className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
+                    onClick={() => {
+                      setIsNewQuizOpen(true)
+                      navigateTo({
+                        to: {
+                          "quizId": quiz?.id
+                        }
+                      })
+                    }}
                   >
                     <Pencil size={13} />
                     Edit
@@ -312,7 +321,7 @@ const DashboardPage = () => {
                   <Trash2 size={16} strokeWidth={1.8} />
                 </button>
               </div>
-            </article>
+            </div>
           ))}
 
           <button

@@ -1,22 +1,28 @@
 import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 import URLS from "#src/config/constant/URLS";
 import queryClientGlobal from "#src/config/tanstack-query.config";
-import useCurrentUser from "#src/hooks/useCurrentUser";
+import useCurrentUser from "#src/services/user/useCurrentUser";
 import { handleGlobalDeleteRequest, handleGlobalPostRequest } from "#src/services/apiRequest";
-import useGetAllQuizzesService from "#src/services/quizzes/useGetAllQuizzeServices";
+import {useGetAllQuizzesService} from "#src/services/quizzes/useQuizzeServices";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
+
+  const { navigateTo} = useGlobalRoutesHandler()
   const {
     service: { getCurrentUserService },
   } = useCurrentUser();
 
+
+
   const {
     services: { getAllQuizzesService },
   } = useGetAllQuizzesService();
+
 
   const logoutMutation = useMutation({
     mutationFn: () =>
@@ -88,6 +94,9 @@ const useDashboard = () => {
       handleCreateQuiz,
       handleDeleteQuiz,
     },
+    route: {
+      navigateTo
+    }
   };
 };
 
