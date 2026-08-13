@@ -2,7 +2,8 @@ import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 import URLS from "#src/config/constant/URLS";
 import queryClientGlobal from "#src/config/tanstack-query.config";
 import useCurrentUser from "#src/hooks/useCurrentUser";
-import { handleGlobalPostRequest } from "#src/services/apiRequest";
+import { handleGlobalDeleteRequest, handleGlobalPostRequest } from "#src/services/apiRequest";
+import useGetAllQuizzesService from "#src/services/quizzes/useGetAllQuizzeServices";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -12,6 +13,10 @@ const useDashboard = () => {
   const {
     service: { getCurrentUserService },
   } = useCurrentUser();
+
+  const {
+    services: { getAllQuizzesService },
+  } = useGetAllQuizzesService();
 
   const logoutMutation = useMutation({
     mutationFn: () =>
@@ -27,20 +32,40 @@ const useDashboard = () => {
   });
 
   const createQuizMutation = useMutation({
-  mutationFn: (data: { title: string }) =>
-    handleGlobalPostRequest<
-      { message: string; success: boolean },
-      { title: string }
-    >({
-      url: URLS.QUIZZES,
-      data,
-    }),
-});
+    mutationFn: (data: { title: string }) =>
+      handleGlobalPostRequest<
+        { message: string; success: boolean },
+        { title: string }
+      >({
+        url: URLS.QUIZZES,
+        data,
+      }),
+  });
+
+  const quizDeleteMutation = useMutation({
+    mutationFn: (quizId: string) =>
+      handleGlobalDeleteRequest<
+        { message: string; success: boolean },
+        Record<string, never>
+      >({
+        url: `${URLS.QUIZZES}/${quizId}`,
+        data: {},
+      }),
+  });
 
   const handleCreateQuiz = (data: { title: string }) => {
     createQuizMutation.mutateAsync(data).then((res) => {
       setIsNewQuizOpen(false);
       toast.success(res?.message || "Quiz created successfully");
+      queryClientGlobal.invalidateQueries({
+        queryKey: [QUERY_KEYS.QUIZZES],
+      });
+    });
+  };
+
+  const handleDeleteQuiz = (quizId: string) => {
+    quizDeleteMutation.mutateAsync(quizId).then((res) => {
+      toast.success(res?.message || "Quiz deleted successfully");
       queryClientGlobal.invalidateQueries({
         queryKey: [QUERY_KEYS.QUIZZES],
       });
@@ -54,12 +79,14 @@ const useDashboard = () => {
     },
     services: {
       getCurrentUserService,
+      getAllQuizzesService,
     },
     mutations: {
       logoutMutation,
     },
     functions: {
       handleCreateQuiz,
+      handleDeleteQuiz,
     },
   };
 };

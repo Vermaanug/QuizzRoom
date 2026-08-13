@@ -2,20 +2,25 @@ import Dropdown from "#src/component/Dropdown/Dropdown";
 import { useMemo } from "react";
 import NewQuizModal from "./component/NewQuizModal";
 import useDashboard from "./hook/useDashboard";
+import {
+  BarChart3,
+  Check,
+  ClipboardList,
+  ChevronDown,
+  Clock3,
+  Copy,
+  FileQuestion,
+  LogOut,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Settings,
+  Trash2,
+  Pencil,
+  User,
+} from "lucide-react";
 
 type TabKey = "all" | "published" | "draft";
-
-type QuizStatus = "published" | "draft";
-
-interface QuizCardData {
-  id: string;
-  title: string;
-  status: QuizStatus;
-  questions: number;
-  roomsPlayed: number;
-  updatedAt: string;
-  accent: string;
-}
 
 const tabs: Array<{ key: TabKey; label: string; count: number }> = [
   { key: "all", label: "All", count: 3 },
@@ -23,131 +28,24 @@ const tabs: Array<{ key: TabKey; label: string; count: number }> = [
   { key: "draft", label: "Draft", count: 1 },
 ];
 
-const quizCards: QuizCardData[] = [
-  {
-    id: "ancient-civilizations",
-    title: "Ancient Civilizations",
-    status: "published",
-    questions: 4,
-    roomsPlayed: 18,
-    updatedAt: "2026-07-12",
-    accent: "from-primary-500/30 via-primary-500/15 to-transparent",
-  },
-  {
-    id: "pop-culture-2025",
-    title: "Pop Culture 2025",
-    status: "published",
-    questions: 3,
-    roomsPlayed: 11,
-    updatedAt: "2026-07-28",
-    accent: "from-primary-500/25 via-primary-500/10 to-transparent",
-  },
-  {
-    id: "science-trivia",
-    title: "Science Trivia",
-    status: "draft",
-    questions: 2,
-    roomsPlayed: 4,
-    updatedAt: "2026-08-01",
-    accent: "from-amber-500/25 via-amber-500/10 to-transparent",
-  },
-];
-
 const stats = [
   {
     title: "Total Quizzes",
     value: "3",
     detail: "Created across all topics",
-    icon: (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="22"
-        viewBox="0 0 24 24"
-        width="22"
-      >
-        <path
-          d="M4 19V5"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M8 19V12"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M12 19V8"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M16 19V14"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M20 19V10"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-      </svg>
-    ),
+    icon: <BarChart3 size={22} strokeWidth={1.8} />,
   },
   {
     title: "Published",
     value: "2",
     detail: "Live and ready to host",
-    icon: (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="22"
-        viewBox="0 0 24 24"
-        width="22"
-      >
-        <path
-          d="M5 12.5 10 17 19 7"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
-      </svg>
-    ),
+    icon: <Check size={22} strokeWidth={2} />,
   },
   {
     title: "Total Questions",
     value: "9",
     detail: "Across all quiz sets",
-    icon: (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="22"
-        viewBox="0 0 24 24"
-        width="22"
-      >
-        <path
-          d="M8 9h8M8 15h8M10 3h4"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M6 3h12v18H6z"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
-      </svg>
-    ),
+    icon: <ClipboardList size={22} strokeWidth={1.8} />,
   },
 ];
 
@@ -161,9 +59,9 @@ const formatDate = (value: string) =>
 const DashboardPage = () => {
   const {
     states: { isNewQuizOpen, setIsNewQuizOpen },
-    services: { getCurrentUserService },
+    services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
-    functions: { handleCreateQuiz },
+    functions: { handleCreateQuiz, handleDeleteQuiz },
   } = useDashboard();
 
   const currentUser = getCurrentUserService.data?.user;
@@ -195,70 +93,17 @@ const DashboardPage = () => {
               {
                 label: "Profile",
                 description: "Account settings coming soon",
-                icon: (
-                  <span className="font-display text-lg uppercase text-primary-500">
-                    A
-                  </span>
-                ),
+                icon: <User size={18} strokeWidth={1.8} />,
               },
               {
                 label: "Settings",
                 description: "Tune your workspace",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    width="18"
-                  >
-                    <path
-                      d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    />
-                    <path
-                      d="M19.4 15a7.8 7.8 0 0 0 .1-.95c0-.32-.03-.64-.1-.95l2-1.56-1.9-3.3-2.42.76a7.8 7.8 0 0 0-1.64-.95L13 5h-2l-.44 2.05c-.58.2-1.13.5-1.64.95l-2.42-.76-1.9 3.3 2 1.56c-.06.31-.1.63-.1.95 0 .32.04.64.1.95l-2 1.56 1.9 3.3 2.42-.76c.51.45 1.06.75 1.64.95L11 19h2l.44-2.05c.58-.2 1.13-.5 1.64-.95l2.42.76 1.9-3.3-2-1.56Z"
-                      stroke="currentColor"
-                      strokeLinejoin="round"
-                      strokeWidth="1.4"
-                    />
-                  </svg>
-                ),
+                icon: <Settings size={18} strokeWidth={1.8} />,
               },
               {
                 label: "Sign out",
                 description: "End your session",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    width="18"
-                  >
-                    <path
-                      d="M10 17 15 12 10 7"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                    <path
-                      d="M15 12H4"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeWidth="1.8"
-                    />
-                    <path
-                      d="M12 4h5a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-5"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                  </svg>
-                ),
+                icon: <LogOut size={18} strokeWidth={1.8} />,
                 tone: "danger",
                 onSelect: () => logoutMutation.mutate(),
               },
@@ -272,22 +117,11 @@ const DashboardPage = () => {
                 <span className="hidden max-w-[120px] truncate font-display text-sm uppercase tracking-[0.04em] text-ink sm:block">
                   {displayName.split(" ")[0]}
                 </span>
-                <svg
-                  aria-hidden="true"
-                  fill="none"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  width="16"
+                <ChevronDown
+                  size={16}
+                  strokeWidth={1.8}
                   className="text-muted transition group-hover:text-ink"
-                >
-                  <path
-                    d="m6 9 6 6 6-6"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
+                />
               </>
             }
           />
@@ -311,11 +145,13 @@ const DashboardPage = () => {
               type="button"
             >
               <span className="text-base">
-                {item.label === "My Quizzes"
-                  ? "▥"
-                  : item.label === "Host a Room"
-                    ? "▶"
-                    : "◷"}
+                {item.label === "My Quizzes" ? (
+                  <ClipboardList size={16} />
+                ) : item.label === "Host a Room" ? (
+                  <Play size={16} />
+                ) : (
+                  <Clock3 size={16} />
+                )}
               </span>
               <span>{item.label}</span>
             </button>
@@ -337,7 +173,9 @@ const DashboardPage = () => {
             onClick={() => setIsNewQuizOpen(true)}
             type="button"
           >
-            <span className="text-lg">＋</span>
+            <span className="text-lg">
+              <Plus size={18} strokeWidth={2} />
+            </span>
             New Quiz
           </button>
         </section>
@@ -393,13 +231,13 @@ const DashboardPage = () => {
         </section>
 
         <section className="mt-6 grid gap-4 xl:grid-cols-3">
-          {quizCards.map((quiz) => (
+          {getAllQuizzesService.data?.quizzes?.map((quiz) => (
             <article
               className="group rounded-xl border border-line bg-surface p-4 shadow-card transition hover:-translate-y-1 hover:border-primary-700/60"
               key={quiz.id}
             >
               <div
-                className={`rounded-lg border border-white/5 bg-gradient-to-br p-4 ${quiz.accent}`}
+                className={`rounded-lg border border-white/5 bg-gradient-to-br p-4 from-primary-500/30 via-primary-500/15 to-transparent" `}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -411,20 +249,17 @@ const DashboardPage = () => {
                     </h2>
                   </div>
                   <button
-                    className="rounded-full border border-line bg-black/30 px-2 py-1.5 text-muted transition hover:border-primary-700 hover:text-primary-500"
+                    className="rounded-full border border-line bg-black/30 p-2 text-muted transition hover:border-primary-700 hover:text-primary-500"
                     type="button"
+                    aria-label="Quiz options"
                   >
-                    ⋯
+                    <MoreHorizontal size={18} strokeWidth={1.8} />
                   </button>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted">
                   <span className="inline-flex items-center gap-2">
-                    <span className="text-sm">#</span>
-                    {quiz.questions} questions
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="text-sm">◷</span>
+                    <Clock3 size={14} strokeWidth={1.8} />
                     {formatDate(quiz.updatedAt)}
                   </span>
                 </div>
@@ -446,29 +281,35 @@ const DashboardPage = () => {
               <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
                 <div className="flex gap-2">
                   <button
-                    className="rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                   >
+                    <Pencil size={13} />
                     Edit
                   </button>
+
                   <button
-                    className="rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                   >
+                    <Play size={13} />
                     Host
                   </button>
+
                   <button
-                    className="rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                   >
+                    <Copy size={13} />
                     Copy
                   </button>
                 </div>
                 <button
                   className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:border-danger hover:text-danger"
                   type="button"
+                  onClick={() => handleDeleteQuiz(quiz.id)}
                 >
-                  🗑
+                  <Trash2 size={16} strokeWidth={1.8} />
                 </button>
               </div>
             </article>
@@ -479,9 +320,11 @@ const DashboardPage = () => {
             onClick={() => setIsNewQuizOpen(true)}
             type="button"
           >
-            <span className="text-4xl transition group-hover:scale-110">
-              ＋
-            </span>
+            <Plus
+              size={36}
+              strokeWidth={1.5}
+              className="transition group-hover:scale-110"
+            />
             <span className="mt-3 font-display text-xl uppercase tracking-[0.14em]">
               New Quiz
             </span>
