@@ -4,6 +4,7 @@ import validateQuizData from "../utils/validateQuizData.js";
 import {
   createQuiz,
   deleteQuizByIdAndOwner,
+  findQuizByIdAndOwner,
   findQuizzesByOwner,
   updateQuizByIdAndOwner,
 } from "../models/quizModel.js";
@@ -91,3 +92,19 @@ export const deleteQuizHandler = async (
     message: "Quiz deleted successfully",
   });
 };
+
+export const getSingleQuizHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const quiz = await findQuizByIdAndOwner(req.params.id, req.user?.id as string);
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404, "QUIZ_NOT_FOUND");
+  }
+
+  res.json({
+    success: true,
+    quiz,
+  });
+}

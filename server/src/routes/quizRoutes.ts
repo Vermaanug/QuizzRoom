@@ -6,6 +6,7 @@ import {
   deleteQuizHandler,
   getQuizzesHandler,
   updateQuizHandler,
+  getSingleQuizHandler
 } from "../controllers/quizController.js";
 
 const quizRouter: Router = express.Router();
@@ -13,6 +14,7 @@ const quizRouter: Router = express.Router();
 quizRouter.use(asyncHandler(authMiddleware));
 
 quizRouter.get("/", asyncHandler(getQuizzesHandler));
+quizRouter.get("/:id", asyncHandler(getSingleQuizHandler));
 quizRouter.post("/", asyncHandler(createQuizHandler));
 quizRouter.patch("/:id", asyncHandler(updateQuizHandler));
 quizRouter.delete("/:id", asyncHandler(deleteQuizHandler));
