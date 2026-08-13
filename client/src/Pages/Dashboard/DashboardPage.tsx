@@ -163,6 +163,7 @@ const DashboardPage = () => {
     states: { isNewQuizOpen, setIsNewQuizOpen },
     services: { getCurrentUserService },
     mutations: { logoutMutation },
+    functions: { handleCreateQuiz },
   } = useDashboard();
 
   const currentUser = getCurrentUserService.data?.user;
@@ -490,9 +491,7 @@ const DashboardPage = () => {
       {isNewQuizOpen && (
         <NewQuizModal
           handleClose={() => setIsNewQuizOpen(false)}
-          onCreate={async () => {
-            setIsNewQuizOpen(false);
-          }}
+          onCreate={handleCreateQuiz}
           isOpen={isNewQuizOpen}
         />
       )}
