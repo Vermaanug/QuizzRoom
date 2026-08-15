@@ -11,13 +11,19 @@ interface Quiz {
   updatedAt: string;
 }
 
-export const useGetAllQuizzesService = () => {
+export const useGetAllQuizzesService = ({ quizType }: { quizType: string }) => {
   const getAllQuizzesService = useQuery({
-    queryKey: [QUERY_KEYS.QUIZZES],
+    queryKey: [QUERY_KEYS.QUIZZES, quizType],
     queryFn: () =>
       handleGlobalGetRequestQuery<{ quizzes: Quiz[] }>({
         url: URLS.QUIZZES,
+        searchParams: {
+          ...(quizType && {
+            type: quizType
+          })
+        }
       }),
+    enabled: !!quizType
   });
 
   return {
@@ -43,4 +49,3 @@ export const useGetSingleQuizService = ({ quizId }: { quizId: string }) => {
     },
   };
 };
-

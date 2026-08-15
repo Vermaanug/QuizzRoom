@@ -1,6 +1,9 @@
+import { QuizStatus } from "@prisma/client";
 import { prisma } from "../db/prisma.js";
 import AppError from "../errors/appError.js";
 import { MappedQuiz, UpdateQuizRequest } from "../types/index.js";
+
+type QuizFilter = "all" | QuizStatus;
 
 const mapQuiz = (quiz: any): MappedQuiz | null => {
   if (!quiz) return null;
@@ -55,10 +58,16 @@ export const findQuizByIdAndOwner = async (
 };
 
 export const findQuizzesByOwner = async (
-  ownerId: string
+  ownerId: string,
+  type: QuizFilter = "all"
 ): Promise<MappedQuiz[]> => {
   const quizzes = await prisma.quiz.findMany({
-    where: { ownerId },
+    where: {
+      ownerId,
+      ...(type !== "all" && {
+        status: type,
+      }),
+    },
     orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
   });
 

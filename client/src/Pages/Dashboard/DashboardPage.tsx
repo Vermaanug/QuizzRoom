@@ -1,32 +1,24 @@
 import Dropdown from "#src/component/Dropdown/Dropdown";
-import { useMemo } from "react";
-import NewQuizModal from "./component/NewQuizModal";
-import useDashboard from "./hook/useDashboard";
 import {
   BarChart3,
   Check,
-  ClipboardList,
   ChevronDown,
+  ClipboardList,
   Clock3,
   Copy,
-  FileQuestion,
   LogOut,
   MoreHorizontal,
+  Pencil,
   Play,
   Plus,
   Settings,
   Trash2,
-  Pencil,
-  User,
+  User
 } from "lucide-react";
+import { useMemo } from "react";
+import NewQuizModal from "./component/NewQuizModal";
+import useDashboard from "./hook/useDashboard";
 
-type TabKey = "all" | "published" | "draft";
-
-const tabs: Array<{ key: TabKey; label: string; count: number }> = [
-  { key: "all", label: "All", count: 3 },
-  { key: "published", label: "Published", count: 2 },
-  { key: "draft", label: "Draft", count: 1 },
-];
 
 const stats = [
   {
@@ -58,7 +50,7 @@ const formatDate = (value: string) =>
 
 const DashboardPage = () => {
   const {
-    states: { isNewQuizOpen, setIsNewQuizOpen },
+    states: { isNewQuizOpen, setIsNewQuizOpen, activeTab, setIsActiveTab, TABS },
     services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
     functions: { handleCreateQuiz, handleDeleteQuiz },
@@ -211,19 +203,22 @@ const DashboardPage = () => {
         </section>
 
         <section className="mt-7 flex flex-wrap gap-2">
-          {tabs.map((tab) => (
+          {TABS.map((tab) => (
             <button
               className={`inline-flex h-9 items-center gap-2.5 rounded-lg border px-4 font-display text-xs uppercase tracking-[0.14em] transition ${
-                tab.key === "all"
+                tab.key === activeTab?.key
                   ? "border-line bg-white/5 text-ink"
                   : "border-line/70 bg-surface text-muted hover:border-primary-700 hover:text-ink"
               }`}
               key={tab.key}
               type="button"
+              onClick={() => {
+                setIsActiveTab(tab)
+              }}
             >
               <span>{tab.label}</span>
               <span
-                className={tab.key === "all" ? "text-ink/70" : "text-muted"}
+                className={tab.key === activeTab?.key ? "text-ink/70" : "text-muted"}
               >
                 {tab.count}
               </span>

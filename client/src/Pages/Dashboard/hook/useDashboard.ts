@@ -9,8 +9,17 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
+type TabKey = "all" | "published" | "draft";
+
+const TABS: Array<{ key: TabKey; label: string; count: number }> = [
+  { key: "all", label: "All", count: 3 },
+  { key: "published", label: "Published", count: 2 },
+  { key: "draft", label: "Draft", count: 1 },
+];
+
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
+  const [activeTab , setIsActiveTab] = useState(TABS[0])
 
   const { navigateTo} = useGlobalRoutesHandler()
   const {
@@ -21,7 +30,9 @@ const useDashboard = () => {
 
   const {
     services: { getAllQuizzesService },
-  } = useGetAllQuizzesService();
+  } = useGetAllQuizzesService({
+    quizType: activeTab?.key
+  });
 
 
   const logoutMutation = useMutation({
@@ -82,6 +93,9 @@ const useDashboard = () => {
     states: {
       isNewQuizOpen,
       setIsNewQuizOpen,
+      activeTab,
+      setIsActiveTab,
+      TABS
     },
     services: {
       getCurrentUserService,

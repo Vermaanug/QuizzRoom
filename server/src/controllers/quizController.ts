@@ -46,7 +46,12 @@ export const getQuizzesHandler = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
-  const quizzes = await findQuizzesByOwner(req.user?.id as string);
+  const type = (req.query.type as "all" | "published" | "draft") || "all";
+
+  const quizzes = await findQuizzesByOwner(
+    req.user?.id as string,
+    type
+  );
 
   res.json({
     success: true,
