@@ -172,36 +172,6 @@ const DashboardPage = () => {
             New Quiz
           </button>
         </section>
-
-        <section className="mt-8 grid gap-4 lg:grid-cols-3">
-          {stats.map((stat, index) => (
-            <article
-              className={`rounded-xl border p-4 shadow-card transition ${
-                index === 1
-                  ? "border-primary-700 bg-primary-500/8"
-                  : "border-line bg-surface"
-              }`}
-              key={stat.title}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-lg ${index === 1 ? "bg-primary-500 text-black" : "bg-white/5 text-muted"}`}
-                >
-                  {stat.icon}
-                </div>
-                <div>
-                  <div
-                    className={`font-display text-3xl uppercase tracking-[-0.03em] ${index === 1 ? "text-primary-500" : "text-ink"}`}
-                  >
-                    {stat.value}
-                  </div>
-                  <p className="text-sm text-muted">{stat.title}</p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </section>
-
         <section className="mt-7 flex flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
