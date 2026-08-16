@@ -21,8 +21,8 @@ quizRouter.patch("/:id", asyncHandler(updateQuizHandler));
 quizRouter.delete("/:id", asyncHandler(deleteQuizHandler));
 
 //Questions
-quizRouter.post("/:id/questions" , asyncHandler(getQuizQuestionsHandler))
-quizRouter.put("/:id/questions" , asyncHandler(bulkSaveQuestionsHandler))
+quizRouter.post("/:quizID/questions" , asyncHandler(getQuizQuestionsHandler))
+quizRouter.put("/:quizID/questions" , asyncHandler(bulkSaveQuestionsHandler))
 
 
 export default quizRouter;

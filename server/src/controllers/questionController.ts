@@ -31,12 +31,12 @@ export const bulkSaveQuestionsHandler = async (
     return res.status(400).json({ success: false, errors });
   }
 
-  const { quizId } = req.params;
+  const { quizID } = req.params;
   const ownerId = req?.user?.id as string;
   const { questions } = req.body as { questions: QuestionInput[] };
 
   const saved = await questionModel.saveQuizQuestionsByOwner(
-    quizId,
+    quizID,
     ownerId,
     questions,
   );

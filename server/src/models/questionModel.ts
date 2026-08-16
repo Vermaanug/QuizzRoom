@@ -52,7 +52,6 @@ export const saveQuizQuestionsByOwner = async (
   questions: QuestionInput[]
 ): Promise<MappedQuestion[]> => {
   const quiz = await prisma.quiz.findFirst({ where: { id: quizId, ownerId } });
-
   if (!quiz) {
     throw new AppError("Quiz not found", 404, "QUIZ_NOT_FOUND");
   }
@@ -89,7 +88,7 @@ export const saveQuizQuestionsByOwner = async (
         optionC: incomingQuestion.optionC.trim(),
         optionD: incomingQuestion.optionD.trim(),
         correctOption: incomingQuestion.correctOption,
-        timeLimitSeconds: incomingQuestion.timeLimitSeconds,
+        timeLimitSeconds: Number(incomingQuestion.timeLimitSeconds),
         orderIndex: positionInArray,
       };
 

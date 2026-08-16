@@ -29,7 +29,7 @@ const options: Array<{
   { key: "D", field: "optionD" },
 ];
 
-const timeLimits: TimeLimit[] = ["10", "30", "60"];
+const timeLimits: TimeLimit[] = [30, 60];
 
 const QuestionForm = ({
   index,
