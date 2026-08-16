@@ -51,7 +51,7 @@ const useDashboard = () => {
   const createQuizMutation = useMutation({
     mutationFn: (data: { title: string }) =>
       handleGlobalPostRequest<
-        { message: string; success: boolean },
+        { message: string; success: boolean; quiz: { id: string; title: string; status: string } },
         { title: string }
       >({
         url: URLS.QUIZZES,
@@ -77,6 +77,9 @@ const useDashboard = () => {
       queryClientGlobal.invalidateQueries({
         queryKey: [QUERY_KEYS.QUIZZES],
       });
+      if (res?.quiz?.id) {
+        navigateTo({ url: `/quiz/${res.quiz.id}` });
+      }
     });
   };
 

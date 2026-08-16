@@ -1,7 +1,5 @@
 import Dropdown from "#src/component/Dropdown/Dropdown";
 import {
-  BarChart3,
-  Check,
   ChevronDown,
   ClipboardList,
   Clock3,
@@ -13,33 +11,11 @@ import {
   Plus,
   Settings,
   Trash2,
-  User
+  User,
 } from "lucide-react";
 import { useMemo } from "react";
 import NewQuizModal from "./component/NewQuizModal";
 import useDashboard from "./hook/useDashboard";
-
-
-const stats = [
-  {
-    title: "Total Quizzes",
-    value: "3",
-    detail: "Created across all topics",
-    icon: <BarChart3 size={22} strokeWidth={1.8} />,
-  },
-  {
-    title: "Published",
-    value: "2",
-    detail: "Live and ready to host",
-    icon: <Check size={22} strokeWidth={2} />,
-  },
-  {
-    title: "Total Questions",
-    value: "9",
-    detail: "Across all quiz sets",
-    icon: <ClipboardList size={22} strokeWidth={1.8} />,
-  },
-];
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -50,11 +26,17 @@ const formatDate = (value: string) =>
 
 const DashboardPage = () => {
   const {
-    states: { isNewQuizOpen, setIsNewQuizOpen, activeTab, setIsActiveTab, TABS },
+    states: {
+      isNewQuizOpen,
+      setIsNewQuizOpen,
+      activeTab,
+      setIsActiveTab,
+      TABS,
+    },
     services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
     functions: { handleCreateQuiz, handleDeleteQuiz },
-    route: {navigateTo}
+    route: { navigateTo },
   } = useDashboard();
 
   const currentUser = getCurrentUserService.data?.user;
@@ -183,12 +165,14 @@ const DashboardPage = () => {
               key={tab.key}
               type="button"
               onClick={() => {
-                setIsActiveTab(tab)
+                setIsActiveTab(tab);
               }}
             >
               <span>{tab.label}</span>
               <span
-                className={tab.key === activeTab?.key ? "text-ink/70" : "text-muted"}
+                className={
+                  tab.key === activeTab?.key ? "text-ink/70" : "text-muted"
+                }
               >
                 {tab.count}
               </span>
@@ -201,6 +185,9 @@ const DashboardPage = () => {
             <div
               className="group rounded-xl border border-line bg-surface p-4 shadow-card transition hover:-translate-y-1 hover:border-primary-700/60"
               key={quiz.id}
+              onClick={() => {
+                navigateTo({ url: `/quiz/${quiz.id}` });
+              }}
             >
               <div
                 className={`rounded-lg border border-white/5 bg-gradient-to-br p-4 from-primary-500/30 via-primary-500/15 to-transparent" `}
@@ -250,12 +237,12 @@ const DashboardPage = () => {
                     className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                     onClick={() => {
-                      setIsNewQuizOpen(true)
+                      setIsNewQuizOpen(true);
                       navigateTo({
                         to: {
-                          "quizId": quiz?.id
-                        }
-                      })
+                          quizId: quiz?.id,
+                        },
+                      });
                     }}
                   >
                     <Pencil size={13} />
