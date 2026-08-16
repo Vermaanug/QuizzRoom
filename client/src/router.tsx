@@ -6,6 +6,7 @@ import ForgotPasswordPage from "./Pages/Auth/ForgotPasswordPage";
 import HomePage from "./Pages/Home/HomePage";
 import ProtectedRoute from "./component/ProtectedRoute/ProtectedRoute";
 import DashboardPage from "./Pages/Dashboard/DashboardPage";
+import QuizEditorPage from "./Pages/QuizEditor/QuizEditorPage";
 
 // Define your routes here
 export const router = createBrowserRouter([
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <DashboardPage />,
+      },
+      {
+        path: "quiz/:quizId",
+        element: <QuizEditorPage />,
       },
     ],
   },

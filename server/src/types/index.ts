@@ -87,3 +87,35 @@ export interface MappedQuiz {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type CorrectOption = "A" | "B" | "C" | "D";
+export type QuestionTimeLimit = 30 | 60;
+
+export interface QuestionInput {
+  id?: string;
+  text: string;
+  codeSnippet?: string | null;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctOption: CorrectOption;
+  timeLimitSeconds: QuestionTimeLimit;
+}
+
+export interface MappedQuestion {
+  id: string;
+  quizId: string;
+  text: string;
+  codeSnippet: string | null;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctOption: CorrectOption;
+  timeLimitSeconds: number;
+  orderIndex: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
