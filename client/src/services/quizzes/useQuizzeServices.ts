@@ -3,7 +3,7 @@ import { handleGlobalGetRequestQuery } from "../apiRequest";
 import URLS from "#src/config/constant/URLS";
 import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 
-interface Quiz {
+export interface Quiz {
   id: string;
   title: string;
   status: "draft" | "published" | "archived";

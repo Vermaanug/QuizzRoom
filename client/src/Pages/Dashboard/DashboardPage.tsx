@@ -18,6 +18,7 @@ import {
 import { useMemo } from "react";
 import NewQuizModal from "./component/NewQuizModal";
 import useDashboard from "./hook/useDashboard";
+import HostRoomModal from "./component/HostRoomModal";
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -34,6 +35,10 @@ const DashboardPage = () => {
       activeTab,
       setIsActiveTab,
       TABS,
+      isHostModalOpen,
+      setIsHostModalOpen,
+      selectedQuiz,
+      setSelectedQuiz
     },
     services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
@@ -252,6 +257,10 @@ const DashboardPage = () => {
                       <button
                         className="inline-flex items-center gap-1.5 border border-primary-500 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-primary-500 transition hover:bg-primary-500 hover:text-black"
                         type="button"
+                        onClick={() => {
+                          setSelectedQuiz(quiz)
+                          setIsHostModalOpen(true)
+                        }}
                         // TODO: wire to a host-room action in useDashboard
                       >
                         <Play size={13} strokeWidth={1.8} />
@@ -317,6 +326,16 @@ const DashboardPage = () => {
           handleClose={() => setIsNewQuizOpen(false)}
           onCreate={handleCreateQuiz}
           isOpen={isNewQuizOpen}
+        />
+      )}
+      {isHostModalOpen && (
+        <HostRoomModal
+          isOpen={isHostModalOpen}
+          handleClose={() => {
+            setIsHostModalOpen(false);
+          }}
+          quiz={selectedQuiz}
+          onGenerateRoom={() => {}}
         />
       )}
     </div>

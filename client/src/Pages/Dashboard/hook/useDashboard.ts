@@ -6,7 +6,7 @@ import {
   handleGlobalDeleteRequest,
   handleGlobalPostRequest,
 } from "#src/services/apiRequest";
-import { useGetAllQuizzesService } from "#src/services/quizzes/useQuizzeServices";
+import { useGetAllQuizzesService, type Quiz } from "#src/services/quizzes/useQuizzeServices";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -22,6 +22,9 @@ const TABS: Array<{ key: TabKey; label: string }> = [
 
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
+  const [isHostModalOpen, setIsHostModalOpen] = useState(false)
+  const [selectedQuiz , setSelectedQuiz] = useState<Quiz>()
+
   const [activeTab, setIsActiveTab] = useState(TABS[0]);
 
   const { navigateTo } = useGlobalRoutesHandler();
@@ -122,6 +125,10 @@ const useDashboard = () => {
       activeTab,
       setIsActiveTab,
       TABS,
+      isHostModalOpen,
+      setIsHostModalOpen,
+      selectedQuiz,
+      setSelectedQuiz
     },
     services: {
       getCurrentUserService,
