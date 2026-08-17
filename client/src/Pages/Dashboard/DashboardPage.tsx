@@ -41,8 +41,8 @@ const DashboardPage = () => {
       setSelectedQuiz
     },
     services: { getCurrentUserService, getAllQuizzesService },
-    mutations: { logoutMutation },
-    functions: { handleCreateQuiz, handleDeleteQuiz, handleQuizPublish },
+    mutations: { logoutMutation, createRoomMutation },
+    functions: { handleCreateQuiz, handleDeleteQuiz, handleQuizPublish, handleCreateRoom },
     route: { navigateTo },
   } = useDashboard();
 
@@ -335,7 +335,8 @@ const DashboardPage = () => {
             setIsHostModalOpen(false);
           }}
           quiz={selectedQuiz}
-          onGenerateRoom={() => {}}
+          onGenerateRoom={handleCreateRoom}
+          isLoading={createRoomMutation?.isPending}
         />
       )}
     </div>

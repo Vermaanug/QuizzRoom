@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import { prisma } from "../db/prisma.js";
 import { MappedRoom } from "../types/index.js";
 
@@ -17,9 +17,7 @@ const mapRoom = (room: any): MappedRoom | null => {
   };
 };
 
-export const findRoomById = async (
-  id: string
-): Promise<MappedRoom | null> => {
+export const findRoomById = async (id: string): Promise<MappedRoom | null> => {
   const room = await prisma.room.findUnique({
     where: {
       id,
@@ -30,7 +28,7 @@ export const findRoomById = async (
 };
 
 export const findRoomByInviteToken = async (
-  inviteToken: string
+  inviteToken: string,
 ): Promise<MappedRoom | null> => {
   const room = await prisma.room.findUnique({
     where: {
@@ -42,7 +40,7 @@ export const findRoomByInviteToken = async (
 };
 
 export const findRoomsByQuizId = async (
-  quizId: string
+  quizId: string,
 ): Promise<MappedRoom[]> => {
   const rooms = await prisma.room.findMany({
     where: {
@@ -54,7 +52,7 @@ export const findRoomsByQuizId = async (
 };
 
 export const findRoomsByHostUserId = async (
-  hostUserId: string
+  hostUserId: string,
 ): Promise<MappedRoom[]> => {
   const rooms = await prisma.room.findMany({
     where: {
@@ -79,7 +77,7 @@ export const createRoom = async ({
       id: randomUUID(),
       quizId,
       hostUserId,
-      inviteToken: randomUUID(),
+      inviteToken: randomBytes(8).toString("base64url"),
       allowAnonymous,
     },
   });
@@ -89,7 +87,7 @@ export const createRoom = async ({
 
 export const updateRoomStatus = async (
   id: string,
-  status: "waiting" | "in_progress" | "completed"
+  status: "waiting" | "in_progress" | "completed",
 ): Promise<MappedRoom> => {
   const room = await prisma.room.update({
     where: {
@@ -109,9 +107,7 @@ export const updateRoomStatus = async (
   return mapRoom(room)!;
 };
 
-export const deleteRoom = async (
-  id: string
-): Promise<MappedRoom> => {
+export const deleteRoom = async (id: string): Promise<MappedRoom> => {
   const room = await prisma.room.delete({
     where: {
       id,

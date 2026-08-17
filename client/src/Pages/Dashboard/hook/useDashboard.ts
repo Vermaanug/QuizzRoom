@@ -6,7 +6,10 @@ import {
   handleGlobalDeleteRequest,
   handleGlobalPostRequest,
 } from "#src/services/apiRequest";
-import { useGetAllQuizzesService, type Quiz } from "#src/services/quizzes/useQuizzeServices";
+import {
+  useGetAllQuizzesService,
+  type Quiz,
+} from "#src/services/quizzes/useQuizzeServices";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -22,8 +25,8 @@ const TABS: Array<{ key: TabKey; label: string }> = [
 
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
-  const [isHostModalOpen, setIsHostModalOpen] = useState(false)
-  const [selectedQuiz , setSelectedQuiz] = useState<Quiz>()
+  const [isHostModalOpen, setIsHostModalOpen] = useState(false);
+  const [selectedQuiz, setSelectedQuiz] = useState<Quiz>();
 
   const [activeTab, setIsActiveTab] = useState(TABS[0]);
 
@@ -88,6 +91,40 @@ const useDashboard = () => {
       }),
   });
 
+  const createRoomMutation = useMutation({
+    mutationFn: ({
+      quizId,
+      allowAnonymous,
+    }: {
+      quizId: string;
+      allowAnonymous: boolean;
+    }) =>
+      handleGlobalPostRequest({
+        url: `${URLS.QUIZZES}/${quizId}/rooms`,
+        data: {
+          allowAnonymous,
+        },
+      }),
+  });
+
+  const handleCreateRoom = ({
+    quizId,
+    allowAnonymousPlayers,
+  }: {
+    quizId: string;
+    allowAnonymousPlayers: boolean;
+  }) => {
+    createRoomMutation
+      .mutateAsync({
+        quizId,
+        allowAnonymous: allowAnonymousPlayers,
+      })
+      .then(() => {
+        setIsHostModalOpen(false)
+        toast.success("Room created successfully");
+      });
+  };
+
   const handleQuizPublish = ({ quizID }: { quizID: string }) => {
     quizPublishMutation.mutateAsync(quizID).then(() => {
       queryClientGlobal.invalidateQueries({
@@ -128,7 +165,7 @@ const useDashboard = () => {
       isHostModalOpen,
       setIsHostModalOpen,
       selectedQuiz,
-      setSelectedQuiz
+      setSelectedQuiz,
     },
     services: {
       getCurrentUserService,
@@ -137,12 +174,14 @@ const useDashboard = () => {
     mutations: {
       logoutMutation,
       quizPublishMutation,
-      quizDeleteMutation
+      quizDeleteMutation,
+      createRoomMutation,
     },
     functions: {
       handleCreateQuiz,
       handleDeleteQuiz,
-      handleQuizPublish
+      handleQuizPublish,
+      handleCreateRoom,
     },
     route: {
       navigateTo,

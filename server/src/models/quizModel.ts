@@ -53,6 +53,13 @@ export const findQuizByIdAndOwner = async (
 ): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
+    include:{
+      _count: {
+        select: {
+          questions: true,
+        }
+      }
+    }
   });
 
   return mapQuiz(quiz);
