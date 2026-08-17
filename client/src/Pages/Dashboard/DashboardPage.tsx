@@ -3,7 +3,8 @@ import {
   ChevronDown,
   ClipboardList,
   Clock3,
-  Copy,
+  ListChecks,
+  Lock,
   LogOut,
   MoreHorizontal,
   Pencil,
@@ -11,6 +12,7 @@ import {
   Plus,
   Settings,
   Trash2,
+  Upload,
   User,
 } from "lucide-react";
 import { useMemo } from "react";
@@ -107,7 +109,6 @@ const DashboardPage = () => {
         <nav className="flex gap-5 border-b border-line/80 text-xs uppercase tracking-[0.16em] text-muted">
           {[
             { label: "My Quizzes", active: true },
-            { label: "Host a Room", active: false },
             { label: "Past Rooms", active: false },
           ].map((item) => (
             <button
@@ -157,7 +158,7 @@ const DashboardPage = () => {
         <section className="mt-7 flex flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
-              className={`inline-flex h-9 items-center gap-2.5 rounded-lg border px-4 font-display text-xs uppercase tracking-[0.14em] transition ${
+              className={`inline-flex h-9 items-center gap-2.5  border px-4 font-display text-xs uppercase tracking-[0.14em] transition ${
                 tab.key === activeTab?.key
                   ? "border-line bg-white/5 text-ink"
                   : "border-line/70 bg-surface text-muted hover:border-primary-700 hover:text-ink"
@@ -169,98 +170,129 @@ const DashboardPage = () => {
               }}
             >
               <span>{tab.label}</span>
-              
             </button>
           ))}
         </section>
 
         <section className="mt-6 grid gap-4 xl:grid-cols-3">
-          {getAllQuizzesService.data?.quizzes?.map((quiz) => (
-            <div
-              className="group rounded-xl border border-line bg-surface p-4 shadow-card transition hover:-translate-y-1 hover:border-primary-700/60"
-              key={quiz.id}
-            >
+          {getAllQuizzesService.data?.quizzes?.map((quiz) => {
+            const isPublished = quiz.status === "published";
+            // Backend's list endpoint doesn't return this yet — see note below.
+            const questionCount = quiz?.questionCount;
+            const canPublish = questionCount > 0;
+
+            return (
               <div
-                className={`rounded-lg border border-white/5 bg-gradient-to-br p-4 from-primary-500/30 via-primary-500/15 to-transparent" `}
+                className="border bg-surface p-4 transition hover:border-primary-700"
+                key={quiz.id}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="inline-flex rounded-full border border-primary-700/80 bg-black/35 px-2.5 py-1 font-display text-[11px] uppercase tracking-[0.14em] text-primary-500">
-                      {quiz.status}
-                    </div>
-                    <h2 className="mt-4 font-display text-2xl uppercase tracking-[-0.03em] text-ink">
-                      {quiz.title}
-                    </h2>
+                  <div
+                    className={`inline-flex items-center border px-2.5 py-1 font-display text-[11px] uppercase tracking-[0.14em] ${
+                      isPublished
+                        ? "border-primary-500 text-primary-500"
+                        : "border-line text-muted"
+                    }`}
+                  >
+                    {quiz.status}
                   </div>
                   <button
-                    className="rounded-full border border-line bg-black/30 p-2 text-muted transition hover:border-primary-700 hover:text-primary-500"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center border border-line text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                     aria-label="Quiz options"
                   >
-                    <MoreHorizontal size={18} strokeWidth={1.8} />
+                    <MoreHorizontal size={16} strokeWidth={1.8} />
                   </button>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted">
-                  <span className="inline-flex items-center gap-2">
-                    <Clock3 size={14} strokeWidth={1.8} />
+                <h2 className="mt-4 truncate font-display text-2xl uppercase tracking-[-0.02em] text-ink">
+                  {quiz.title}
+                </h2>
+
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock3 size={13} strokeWidth={1.8} />
                     {formatDate(quiz.updatedAt)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <ListChecks size={13} strokeWidth={1.8} />
+                    {questionCount} question{questionCount === 1 ? "" : "s"}
                   </span>
                 </div>
 
-                <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/5">
+                <div className="mt-4 h-[3px] bg-line">
                   <div
-                    className={`h-full rounded-full ${
-                      quiz.status === "published"
-                        ? "bg-primary-500"
-                        : "bg-amber-500"
-                    }`}
+                    className={
+                      isPublished
+                        ? "h-full bg-primary-500"
+                        : "h-full bg-primary-700"
+                    }
                     style={{
-                      width: quiz.status === "published" ? "100%" : "58%",
+                      width: isPublished ? "100%" : canPublish ? "70%" : "20%",
                     }}
                   />
                 </div>
-              </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
-                <div className="flex gap-2">
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
-                    type="button"
-                    onClick={() => {
-                      navigateTo({ url: `/quiz/${quiz.id}` });
-                    }}
-                  >
-                    <Pencil size={13} />
-                    Edit
-                  </button>
+                <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="inline-flex items-center gap-1.5 border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition hover:border-primary-700"
+                      type="button"
+                      onClick={() => {
+                        navigateTo({ url: `/quiz/${quiz.id}` });
+                      }}
+                    >
+                      <Pencil size={13} strokeWidth={1.8} />
+                      Edit
+                    </button>
+
+                    {isPublished ? (
+                      <button
+                        className="inline-flex items-center gap-1.5 border border-primary-500 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-primary-500 transition hover:bg-primary-500 hover:text-black"
+                        type="button"
+                        // TODO: wire to a host-room action in useDashboard
+                      >
+                        <Play size={13} strokeWidth={1.8} />
+                        Host
+                      </button>
+                    ) : (
+                      <button
+                        className={
+                          canPublish
+                            ? "inline-flex items-center gap-1.5 border border-primary-500 bg-primary-500 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-black transition hover:bg-primary-100"
+                            : "inline-flex cursor-not-allowed items-center gap-1.5 border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted opacity-60"
+                        }
+                        type="button"
+                        disabled={!canPublish}
+                        title={
+                          canPublish
+                            ? undefined
+                            : "Add at least one question to publish"
+                        }
+                        // TODO: wire to a publish mutation in useDashboard
+                      >
+                        {canPublish ? (
+                          <Upload size={13} strokeWidth={1.8} />
+                        ) : (
+                          <Lock size={13} strokeWidth={1.8} />
+                        )}
+                        Publish
+                      </button>
+                    )}
+                  </div>
 
                   <button
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center border border-line text-muted transition hover:border-danger hover:text-danger"
                     type="button"
+                    aria-label={`Delete ${quiz.title}`}
+                    onClick={() => handleDeleteQuiz(quiz.id)}
                   >
-                    <Play size={13} />
-                    Host
-                  </button>
-
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
-                    type="button"
-                  >
-                    <Copy size={13} />
-                    Copy
+                    <Trash2 size={14} strokeWidth={1.8} />
                   </button>
                 </div>
-                <button
-                  className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:border-danger hover:text-danger"
-                  type="button"
-                  onClick={() => handleDeleteQuiz(quiz.id)}
-                >
-                  <Trash2 size={16} strokeWidth={1.8} />
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <button
             className="group flex min-h-[260px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-line bg-black/20 text-muted transition hover:border-primary-700 hover:bg-white/[0.03] hover:text-primary-500"

@@ -52,6 +52,7 @@ export const getQuizzesHandler = async (
     req.user?.id as string,
     type
   );
+  
 
   res.json({
     success: true,

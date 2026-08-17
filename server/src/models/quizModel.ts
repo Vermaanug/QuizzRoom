@@ -13,6 +13,7 @@ const mapQuiz = (quiz: any): MappedQuiz | null => {
     title: quiz.title,
     status: quiz.status,
     ownerId: quiz.ownerId,
+    questionCount: quiz._count.questions,
     createdAt: quiz.createdAt,
     updatedAt: quiz.updatedAt,
   };
@@ -69,6 +70,13 @@ export const findQuizzesByOwner = async (
       }),
     },
     orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
+    include:{
+      _count: {
+        select: {
+          questions: true,
+        }
+      }
+    }
   });
 
   return quizzes.map(mapQuiz).filter((q) => q !== null) as MappedQuiz[];

@@ -7,6 +7,7 @@ interface Quiz {
   id: string;
   title: string;
   status: "draft" | "published" | "archived";
+  questionCount: number;
   createdAt: string;
   updatedAt: string;
 }

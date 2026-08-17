@@ -83,6 +83,7 @@ export interface MappedQuiz {
   id: string;
   title: string;
   status: "draft" | "published" | "archived";
+  questionCount: number;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
