@@ -11,10 +11,10 @@ import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
 type TabKey = "all" | "published" | "draft";
 
-const TABS: Array<{ key: TabKey; label: string; count: number }> = [
-  { key: "all", label: "All", count: 3 },
-  { key: "published", label: "Published", count: 2 },
-  { key: "draft", label: "Draft", count: 1 },
+const TABS: Array<{ key: TabKey; label: string; }> = [
+  { key: "all", label: "All" },
+  { key: "published", label: "Published" },
+  { key: "draft", label: "Draft" },
 ];
 
 const useDashboard = () => {

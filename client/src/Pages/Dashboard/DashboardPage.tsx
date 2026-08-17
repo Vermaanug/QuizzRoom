@@ -169,13 +169,7 @@ const DashboardPage = () => {
               }}
             >
               <span>{tab.label}</span>
-              <span
-                className={
-                  tab.key === activeTab?.key ? "text-ink/70" : "text-muted"
-                }
-              >
-                {tab.count}
-              </span>
+              
             </button>
           ))}
         </section>
@@ -185,9 +179,6 @@ const DashboardPage = () => {
             <div
               className="group rounded-xl border border-line bg-surface p-4 shadow-card transition hover:-translate-y-1 hover:border-primary-700/60"
               key={quiz.id}
-              onClick={() => {
-                navigateTo({ url: `/quiz/${quiz.id}` });
-              }}
             >
               <div
                 className={`rounded-lg border border-white/5 bg-gradient-to-br p-4 from-primary-500/30 via-primary-500/15 to-transparent" `}
@@ -237,12 +228,7 @@ const DashboardPage = () => {
                     className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-muted transition hover:border-primary-700 hover:text-ink"
                     type="button"
                     onClick={() => {
-                      setIsNewQuizOpen(true);
-                      navigateTo({
-                        to: {
-                          quizId: quiz?.id,
-                        },
-                      });
+                      navigateTo({ url: `/quiz/${quiz.id}` });
                     }}
                   >
                     <Pencil size={13} />

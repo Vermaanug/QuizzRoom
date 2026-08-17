@@ -86,7 +86,6 @@ const QuestionForm = ({
           <button
             type="button"
             onClick={onRemove}
-            
             aria-label={`Delete question ${questionNumber}`}
             className="flex h-14 w-14 shrink-0 items-center justify-center border-l text-muted transition hover:text-danger focus:outline-none focus:ring-2 focus:ring-primary-700"
           >
@@ -115,7 +114,9 @@ const QuestionForm = ({
             className={`w-full resize-y border bg-canvas px-5 py-4 text-base text-ink outline-none placeholder:text-muted focus:border-primary-700 ${
               questionErrors?.text ? "border-danger" : ""
             }`}
-            {...register(fieldName("text"))}
+            {...register(fieldName("text"), {
+              required: "Question text is required",
+            })}
           />
 
           {questionErrors?.text && (
@@ -183,7 +184,9 @@ const QuestionForm = ({
                       className={`h-14 w-full border bg-canvas px-5 text-ink outline-none placeholder:text-muted focus:border-primary-700 ${
                         optionError ? "border-danger" : ""
                       }`}
-                      {...register(fieldName(field))}
+                      {...register(fieldName(field), {
+                        required: `Option ${key} is required`,
+                      })}
                     />
 
                     {optionError && (

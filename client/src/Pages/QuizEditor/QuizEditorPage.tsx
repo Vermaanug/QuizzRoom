@@ -43,6 +43,10 @@ const QuizEditorPage = () => {
     quizQuestionsSaveMutation
       .mutateAsync({ quizId, questions: data.questions })
       .then(() => {
+        navigateTo({
+          url: "dashboard",
+          replace: true
+        })
         toast.success("Quizz Update Successfully");
       });
   };
@@ -75,7 +79,7 @@ const QuizEditorPage = () => {
               </h1>
             </div>
 
-            <Button type="submit" className="sm:w-auto">
+            <Button type="submit" className="sm:w-auto" loading={quizQuestionsSaveMutation?.isPending}>
               Save Quiz
             </Button>
           </header>
