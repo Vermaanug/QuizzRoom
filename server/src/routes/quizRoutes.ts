@@ -7,6 +7,7 @@ import {
   getQuizzesHandler,
   updateQuizHandler,
   getSingleQuizHandler,
+  publishQuizHandler,
 } from "../controllers/quizController.js";
 import { bulkSaveQuestionsHandler, getQuizQuestionsHandler } from "../controllers/questionController.js";
 
@@ -19,6 +20,7 @@ quizRouter.get("/:id", asyncHandler(getSingleQuizHandler));
 quizRouter.post("/", asyncHandler(createQuizHandler));
 quizRouter.patch("/:id", asyncHandler(updateQuizHandler));
 quizRouter.delete("/:id", asyncHandler(deleteQuizHandler));
+quizRouter.post("/:id/publish", asyncHandler(publishQuizHandler));
 
 //Questions
 quizRouter.post("/:quizID/questions" , asyncHandler(getQuizQuestionsHandler))

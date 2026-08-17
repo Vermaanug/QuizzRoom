@@ -37,7 +37,7 @@ const DashboardPage = () => {
     },
     services: { getCurrentUserService, getAllQuizzesService },
     mutations: { logoutMutation },
-    functions: { handleCreateQuiz, handleDeleteQuiz },
+    functions: { handleCreateQuiz, handleDeleteQuiz, handleQuizPublish },
     route: { navigateTo },
   } = useDashboard();
 
@@ -235,16 +235,18 @@ const DashboardPage = () => {
 
                 <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      className="inline-flex items-center gap-1.5 border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition hover:border-primary-700"
-                      type="button"
-                      onClick={() => {
-                        navigateTo({ url: `/quiz/${quiz.id}` });
-                      }}
-                    >
-                      <Pencil size={13} strokeWidth={1.8} />
-                      Edit
-                    </button>
+                    {!isPublished && (
+                      <button
+                        className="inline-flex items-center gap-1.5 border border-line px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition hover:border-primary-700"
+                        type="button"
+                        onClick={() => {
+                          navigateTo({ url: `/quiz/${quiz.id}` });
+                        }}
+                      >
+                        <Pencil size={13} strokeWidth={1.8} />
+                        Edit
+                      </button>
+                    )}
 
                     {isPublished ? (
                       <button
@@ -269,7 +271,7 @@ const DashboardPage = () => {
                             ? undefined
                             : "Add at least one question to publish"
                         }
-                        // TODO: wire to a publish mutation in useDashboard
+                        onClick={() => handleQuizPublish({ quizID: quiz?.id })}
                       >
                         {canPublish ? (
                           <Upload size={13} strokeWidth={1.8} />

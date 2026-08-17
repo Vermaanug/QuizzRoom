@@ -2,8 +2,11 @@ import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 import URLS from "#src/config/constant/URLS";
 import queryClientGlobal from "#src/config/tanstack-query.config";
 import useCurrentUser from "#src/services/user/useCurrentUser";
-import { handleGlobalDeleteRequest, handleGlobalPostRequest } from "#src/services/apiRequest";
-import {useGetAllQuizzesService} from "#src/services/quizzes/useQuizzeServices";
+import {
+  handleGlobalDeleteRequest,
+  handleGlobalPostRequest,
+} from "#src/services/apiRequest";
+import { useGetAllQuizzesService } from "#src/services/quizzes/useQuizzeServices";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -11,7 +14,7 @@ import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
 type TabKey = "all" | "published" | "draft";
 
-const TABS: Array<{ key: TabKey; label: string; }> = [
+const TABS: Array<{ key: TabKey; label: string }> = [
   { key: "all", label: "All" },
   { key: "published", label: "Published" },
   { key: "draft", label: "Draft" },
@@ -19,21 +22,18 @@ const TABS: Array<{ key: TabKey; label: string; }> = [
 
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
-  const [activeTab , setIsActiveTab] = useState(TABS[0])
+  const [activeTab, setIsActiveTab] = useState(TABS[0]);
 
-  const { navigateTo} = useGlobalRoutesHandler()
+  const { navigateTo } = useGlobalRoutesHandler();
   const {
     service: { getCurrentUserService },
   } = useCurrentUser();
 
-
-
   const {
     services: { getAllQuizzesService },
   } = useGetAllQuizzesService({
-    quizType: activeTab?.key
+    quizType: activeTab?.key,
   });
-
 
   const logoutMutation = useMutation({
     mutationFn: () =>
@@ -51,7 +51,11 @@ const useDashboard = () => {
   const createQuizMutation = useMutation({
     mutationFn: (data: { title: string }) =>
       handleGlobalPostRequest<
-        { message: string; success: boolean; quiz: { id: string; title: string; status: string } },
+        {
+          message: string;
+          success: boolean;
+          quiz: { id: string; title: string; status: string };
+        },
         { title: string }
       >({
         url: URLS.QUIZZES,
@@ -69,6 +73,25 @@ const useDashboard = () => {
         data: {},
       }),
   });
+
+  const quizPublishMutation = useMutation({
+    mutationFn: (quizId: string) =>
+      handleGlobalPostRequest<
+        { id: string; title: string; status: string },
+        Record<string, never>
+      >({
+        url: `${URLS.QUIZZES}/${quizId}/publish`,
+        data: {},
+      }),
+  });
+
+  const handleQuizPublish = ({ quizID }: { quizID: string }) => {
+    quizPublishMutation.mutateAsync(quizID).then(() => {
+      queryClientGlobal.invalidateQueries({
+        queryKey: [QUERY_KEYS.QUIZZES],
+      });
+    });
+  };
 
   const handleCreateQuiz = (data: { title: string }) => {
     createQuizMutation.mutateAsync(data).then((res) => {
@@ -90,7 +113,7 @@ const useDashboard = () => {
         queryKey: [QUERY_KEYS.QUIZZES],
       });
     });
-  }
+  };
 
   return {
     states: {
@@ -98,7 +121,7 @@ const useDashboard = () => {
       setIsNewQuizOpen,
       activeTab,
       setIsActiveTab,
-      TABS
+      TABS,
     },
     services: {
       getCurrentUserService,
@@ -106,14 +129,17 @@ const useDashboard = () => {
     },
     mutations: {
       logoutMutation,
+      quizPublishMutation,
+      quizDeleteMutation
     },
     functions: {
       handleCreateQuiz,
       handleDeleteQuiz,
+      handleQuizPublish
     },
     route: {
-      navigateTo
-    }
+      navigateTo,
+    },
   };
 };
 

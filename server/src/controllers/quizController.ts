@@ -6,6 +6,7 @@ import {
   deleteQuizByIdAndOwner,
   findQuizByIdAndOwner,
   findQuizzesByOwner,
+  publishQuizByOwner,
   updateQuizByIdAndOwner,
 } from "../models/quizModel.js";
 import { AuthenticatedRequest } from "../types/index.js";
@@ -113,4 +114,12 @@ export const getSingleQuizHandler = async (
     success: true,
     quiz,
   });
+}
+
+export const publishQuizHandler = async (req: AuthenticatedRequest , res: Response) => {
+  const { quizID } = req.params;
+  const ownerId = req?.user?.id as string;
+
+  const quiz = await publishQuizByOwner(quizID, ownerId);
+  res.json(quiz);
 }

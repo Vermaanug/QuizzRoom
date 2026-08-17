@@ -13,7 +13,7 @@ const mapQuiz = (quiz: any): MappedQuiz | null => {
     title: quiz.title,
     status: quiz.status,
     ownerId: quiz.ownerId,
-    questionCount: quiz._count.questions,
+    questionCount: quiz._count.questions ?? 0,
     createdAt: quiz.createdAt,
     updatedAt: quiz.updatedAt,
   };
@@ -121,4 +121,48 @@ export const deleteQuizByIdAndOwner = async (
   await prisma.quiz.delete({
     where: { id: quiz.id },
   });
+};
+
+export const publishQuizByOwner = async (
+  id: string,
+  ownerId: string
+): Promise<MappedQuiz> => {
+  const quiz = await prisma.quiz.findFirst({
+    where: { id, ownerId },
+    include: {
+      _count: {
+        select: {
+          questions: true
+        }
+      }
+    }
+  });
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404, "QUIZ_NOT_FOUND");
+  }
+ 
+  console.log(quiz?._count?.questions)
+
+  if (quiz?._count?.questions <= 0) {
+    throw new AppError(
+      "Add at least one question before publishing",
+      400,
+      "QUIZ_HAS_NO_QUESTIONS"
+    );
+  }
+ 
+  const publishedQuiz = await prisma.quiz.update({
+    where: { id: quiz.id },
+    data: { status: "published" },
+    include: {
+      _count: {
+        select: {
+          questions: true
+        }
+      }
+    }
+  });
+ 
+  return mapQuiz(publishedQuiz)!;
 };
