@@ -15,6 +15,7 @@ model User {
   email        String   @unique @db.VarChar(255)
   passwordHash String   @map("password_hash") @db.Text
   quizzes      Quiz[]
+  hostedRooms  Room[]
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -28,8 +29,10 @@ model Quiz {
   ownerId       String      @map("owner_id") @db.Uuid
   owner         User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   questions     Question[]
+  rooms         Room[]
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
 
   @@index([ownerId, status])
   @@map("quizzes")
@@ -65,4 +68,29 @@ enum QuizStatus {
   draft
   published
   archived
+}
+
+enum RoomStatus {
+  waiting
+  in_progress
+  completed
+}
+
+model Room {
+  id             String     @id @default(uuid()) @db.Uuid
+  quizId         String     @map("quiz_id") @db.Uuid
+  hostUserId     String     @map("host_user_id") @db.Uuid
+  inviteToken    String     @unique @map("invite_token")
+  allowAnonymous Boolean    @default(true) @map("allow_anonymous")
+  status         RoomStatus @default(waiting)
+  startedAt      DateTime?  @map("started_at")
+  endedAt        DateTime?  @map("ended_at")
+
+  quiz           Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  hostUser       User       @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@index([hostUserId])
+  @@index([status])
+  @@map("rooms")
 }
