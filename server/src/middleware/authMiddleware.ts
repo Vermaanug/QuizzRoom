@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../types/index.js";
 import AppError from "../errors/appError.js";
 import jwt from "jsonwebtoken";
 import { findUserById } from "../models/userModel.js";
+import { User } from "@prisma/client";
 
 interface DecodedToken {
   id: string;
@@ -38,7 +39,7 @@ const authMiddleware = async (
     throw new AppError("User not found", 401, "USER_NOT_FOUND");
   }
 
-  req.user = user as any;
+  req.user = user as User;
   if (next) {
     return next();
   }

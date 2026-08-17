@@ -120,3 +120,13 @@ export interface MappedQuestion {
   updatedAt: Date;
 }
 
+export type MappedRoom = {
+  id: string;
+  quizId: string;
+  hostUserId: string;
+  inviteToken: string;
+  allowAnonymous: boolean;
+  status: "waiting" | "in_progress" | "completed";
+  startedAt: Date | null;
+  endedAt: Date | null;
+};

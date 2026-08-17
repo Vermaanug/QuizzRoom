@@ -10,6 +10,7 @@ import {
   publishQuizHandler,
 } from "../controllers/quizController.js";
 import { bulkSaveQuestionsHandler, getQuizQuestionsHandler } from "../controllers/questionController.js";
+import { createRoomHandler } from "../controllers/roomController.js";
 
 const quizRouter: Router = express.Router();
 
@@ -21,9 +22,10 @@ quizRouter.post("/", asyncHandler(createQuizHandler));
 quizRouter.patch("/:id", asyncHandler(updateQuizHandler));
 quizRouter.delete("/:id", asyncHandler(deleteQuizHandler));
 quizRouter.post("/:id/publish", asyncHandler(publishQuizHandler));
+quizRouter.post("/:id/rooms" , asyncHandler(createRoomHandler))
 
 //Questions
-quizRouter.post("/:quizID/questions" , asyncHandler(getQuizQuestionsHandler))
+quizRouter.get("/:quizID/questions" , asyncHandler(getQuizQuestionsHandler))
 quizRouter.put("/:quizID/questions" , asyncHandler(bulkSaveQuestionsHandler))
 
 
