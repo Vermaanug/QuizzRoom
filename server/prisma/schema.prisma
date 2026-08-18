@@ -16,6 +16,7 @@ model User {
   passwordHash String   @map("password_hash") @db.Text
   quizzes      Quiz[]
   hostedRooms  Room[]
+  participations Participant[]
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -87,6 +88,7 @@ model Room {
   endedAt        DateTime?  @map("ended_at")
   createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  participants Participant[]
 
   quiz           Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
   hostUser       User       @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
@@ -95,4 +97,30 @@ model Room {
   @@index([hostUserId])
   @@index([status])
   @@map("rooms")
+}
+
+enum ParticipantConnectionStatus {
+  connected
+  disconnected
+}
+
+model Participant {
+  id             String                        @id @default(uuid()) @db.Uuid
+  roomId         String                        @map("room_id") @db.Uuid
+  room           Room                          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  // Nullable — anonymous participants (PRD §6) have no User row.
+  userId         String?                       @map("user_id") @db.Uuid
+  user           User?                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName    String                        @map("display_name") @db.VarChar(50)
+
+  connectionStatus ParticipantConnectionStatus @default(connected) @map("connection_status")
+
+  joinedAt       DateTime                      @default(now()) @map("joined_at") @db.Timestamptz(6)
+  disconnectedAt DateTime?                     @map("disconnected_at")
+
+  @@index([roomId])
+  @@index([roomId, userId])
+  @@map("participants")
 }
