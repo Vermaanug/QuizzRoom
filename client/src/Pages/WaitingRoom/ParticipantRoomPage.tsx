@@ -7,24 +7,18 @@ type RoomPhase = "join" | "lobby" | "question";
 
 const ParticipantRoomPage = () => {
   const [phase, setPhase] = useState<RoomPhase>("join");
-  const [name, setName] = useState("");
 
   const playerCount = 2
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       {phase === "join" && (
-        <JoinScreen
-          name={name}
-          onNameChange={setName}
-          onJoin={() => setPhase("lobby")}
-        />
+        <JoinScreen onNext={() => setPhase("lobby")} />
       )}
 
       {phase === "lobby" && (
         <LobbyScreen
-          name={name}
-          playerCount={playerCount}
+         
         />
       )}
 

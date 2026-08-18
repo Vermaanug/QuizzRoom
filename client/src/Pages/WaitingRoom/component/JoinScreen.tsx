@@ -1,17 +1,56 @@
 import BrandMark from "#src/component/Brand/BrandMark";
+import URLS from "#src/config/constant/URLS";
+import { handleGlobalPostRequest } from "#src/services/apiRequest";
 import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import TextInput from "#src/component/Form/TextInput";
 
-interface JoinScreenProps {
-  name: string;
-  onNameChange: (name: string) => void;
-  onJoin: () => void;
+interface JoinRoomFormValues {
+  displayName: string;
 }
 
-const JoinScreen = ({ name, onNameChange, onJoin }: JoinScreenProps) => {
+const JoinScreen = ({ onNext }: { onNext: () => void }) => {
   const { activeRoutes } = useGlobalRoutesHandler();
-
   const roomToken = activeRoutes[activeRoutes.length - 1];
-  const canJoin = name.trim().length > 0;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<JoinRoomFormValues>({
+    mode: "onChange",
+    defaultValues: {
+      displayName: "",
+    },
+  });
+
+  const joinRoomParticipant = useMutation({
+    mutationFn: ({
+      token,
+      displayName,
+    }: {
+      token: string;
+      displayName: string;
+    }) =>
+      handleGlobalPostRequest({
+        url: `${URLS.ROOM}/${token}/rooms`,
+        data: {
+          displayName,
+        },
+      }),
+  });
+
+  const onSubmit = (values: JoinRoomFormValues) => {
+    joinRoomParticipant
+      .mutateAsync({
+        token: roomToken,
+        displayName: values.displayName,
+      })
+      .then(() => {
+        onNext?.();
+      });
+  };
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[540px] flex-col items-center px-5 py-24 sm:px-10">
@@ -27,41 +66,31 @@ const JoinScreen = ({ name, onNameChange, onJoin }: JoinScreenProps) => {
 
       <form
         className="mt-14 w-full"
-        onSubmit={(event) => {
-          event.preventDefault();
-
-          if (canJoin) {
-            onJoin();
-          }
-        }}
+        onSubmit={handleSubmit(onSubmit)}
         noValidate
       >
-        <label
-          htmlFor="participant-name"
-          className="mb-2 block font-display text-xs uppercase tracking-[0.12em] text-muted"
-        >
-          Your name
-        </label>
-
-        <input
+        <TextInput
           id="participant-name"
-          name="participant-name"
-          type="text"
-          autoComplete="name"
+          label="Your name"
           placeholder="Enter your name..."
-          value={name}
-          onChange={(event) => onNameChange(event.target.value)}
-          aria-required="true"
-          className="h-14 w-full border bg-surface px-5 text-ink outline-none placeholder:text-muted focus:border-primary-700 focus:ring-2 focus:ring-primary-700"
+          autoComplete="name"
+          registration={register("displayName", {
+            required: "Please enter your name",
+            minLength: {
+              value: 2,
+              message: "Name must be at least 2 characters",
+            },
+          })}
+          error={errors.displayName?.message}
         />
 
         <button
           type="submit"
-          disabled={!canJoin}
+          disabled={!isValid || joinRoomParticipant.isPending}
           className="mt-5 flex h-14 w-full items-center justify-center gap-2 bg-primary-500 px-5 font-display uppercase tracking-[0.12em] text-black shadow-button transition hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span aria-hidden="true">&gt;</span>
-          Join room
+          {joinRoomParticipant.isPending ? "Joining..." : "Join room"}
         </button>
       </form>
     </main>
