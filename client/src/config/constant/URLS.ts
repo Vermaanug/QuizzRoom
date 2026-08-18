@@ -4,6 +4,7 @@ const URLS = {
     CURRENT_USER: "/api/auth/me",
     LOGOUT: "/api/auth/logout",
     QUIZZES: "/api/quizzes",
+    ROOM: "/room"
 }
 
 export default URLS;

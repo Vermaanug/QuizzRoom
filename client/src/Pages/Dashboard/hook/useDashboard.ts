@@ -119,9 +119,12 @@ const useDashboard = () => {
         quizId,
         allowAnonymous: allowAnonymousPlayers,
       })
-      .then(() => {
+      .then((res) => {
         setIsHostModalOpen(false)
         toast.success("Room created successfully");
+        navigateTo({
+          url: `/room/${res?.room?.inviteToken}`
+        })
       });
   };
 

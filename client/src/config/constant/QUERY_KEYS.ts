@@ -1,6 +1,7 @@
 const QUERY_KEYS = {
   CURRENT_USER: "CURRENT_USER",
   QUIZZES: "QUIZZES",
+  CURRENT_ROOM: "CURRENT_ROOM"
 };
 
 export default QUERY_KEYS;

@@ -7,6 +7,8 @@ import HomePage from "./Pages/Home/HomePage";
 import ProtectedRoute from "./component/ProtectedRoute/ProtectedRoute";
 import DashboardPage from "./Pages/Dashboard/DashboardPage";
 import QuizEditorPage from "./Pages/QuizEditor/QuizEditorPage";
+import HostWaitingRoomPage from "./Pages/WaitingRoom/HostWaitingRoomPage";
+import ParticipantRoomPage from "./Pages/WaitingRoom/ParticipantRoomPage"
 
 // Define your routes here
 export const router = createBrowserRouter([
@@ -25,7 +27,16 @@ export const router = createBrowserRouter([
         path: "quiz/:quizId",
         element: <QuizEditorPage />,
       },
+      {
+        path: "room/:roomToken",
+        element: <HostWaitingRoomPage />,
+      },
     ],
+  },
+  {
+
+    path: "join/:roomToken",
+    element: <ParticipantRoomPage />,
   },
   {
     path: "/auth",

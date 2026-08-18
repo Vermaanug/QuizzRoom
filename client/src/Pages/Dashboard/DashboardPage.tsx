@@ -54,12 +54,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-primary-500/8 blur-3xl" />
-        <div className="absolute right-[-10rem] top-[10rem] h-80 w-80 rounded-full bg-primary-500/6 blur-3xl" />
-        <div className="absolute inset-x-0 bottom-0 h-[22rem] bg-[radial-gradient(circle_at_center,rgba(198,255,0,0.06),transparent_60%)]" />
-      </div>
-
       <header className="relative z-50 border-b border-line/80 bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
