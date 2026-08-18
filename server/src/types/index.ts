@@ -130,3 +130,13 @@ export type MappedRoom = {
   startedAt: Date | null;
   endedAt: Date | null;
 };
+
+export type MappedParticipant = {
+  id: string;
+  roomId: string;
+  userId: string | null;
+  displayName: string;
+  connectionStatus: "connected" | "disconnected";
+  joinedAt: Date;
+  disconnectedAt: Date | null;
+};

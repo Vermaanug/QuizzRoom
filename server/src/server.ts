@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
+import roomRouter from "./routes/roomRoutes.js";
 
 const app: Express = express();
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/quizzes", quizRouter);
+app.use("/room", roomRouter)
 
 app.use(notFound);
 app.use(errorHandler);

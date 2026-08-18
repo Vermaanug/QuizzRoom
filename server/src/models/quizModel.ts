@@ -42,6 +42,13 @@ export const createQuiz = async ({
 export const findQuizById = async (id: string): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findUnique({
     where: { id },
+    include:{
+      _count: {
+        select: {
+          questions: true,
+        }
+      }
+    }
   });
 
   return mapQuiz(quiz);
@@ -148,8 +155,6 @@ export const publishQuizByOwner = async (
   if (!quiz) {
     throw new AppError("Quiz not found", 404, "QUIZ_NOT_FOUND");
   }
- 
-  console.log(quiz?._count?.questions)
 
   if (quiz?._count?.questions <= 0) {
     throw new AppError(
