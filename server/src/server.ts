@@ -8,6 +8,8 @@ import cors from "cors";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 import roomRouter from "./routes/roomRoutes.js";
+import { initSocketServer } from "./sockets/index.js";
+import { createServer } from "http";
 
 const app: Express = express();
 
@@ -27,10 +29,13 @@ app.use("/room", roomRouter)
 app.use(notFound);
 app.use(errorHandler);
 
+const httpServer = createServer(app);
+initSocketServer(httpServer);
+
 connectDb()
   .then(() => {
     const port = process.env.PORT || 3000;
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   })

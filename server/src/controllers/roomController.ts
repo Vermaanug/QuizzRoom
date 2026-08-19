@@ -81,6 +81,7 @@ export const getRoomByTokenHandler = async (
 
   return res.status(200).json({
     room: {
+      id: room.id,
       inviteToken: room.inviteToken,
       status: room.status,
       allowAnonymous: room.allowAnonymous,
