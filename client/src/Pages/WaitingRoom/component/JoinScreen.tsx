@@ -10,7 +10,27 @@ interface JoinRoomFormValues {
   displayName: string;
 }
 
-const JoinScreen = ({ onNext }: { onNext: () => void }) => {
+// Matches MappedParticipant on the server (server/src/types/index.ts).
+export interface JoinedParticipant {
+  id: string;
+  roomId: string;
+  userId: string | null;
+  displayName: string;
+  connectionStatus: "connected" | "disconnected";
+  joinedAt: string;
+  disconnectedAt: string | null;
+}
+
+interface JoinRoomResponse {
+  message: string;
+  participant: JoinedParticipant;
+}
+
+const JoinScreen = ({
+  onNext,
+}: {
+  onNext: (participant: JoinedParticipant) => void;
+}) => {
   const { activeRoutes } = useGlobalRoutesHandler();
   const roomToken = activeRoutes[activeRoutes.length - 1];
 
@@ -33,8 +53,8 @@ const JoinScreen = ({ onNext }: { onNext: () => void }) => {
       token: string;
       displayName: string;
     }) =>
-      handleGlobalPostRequest({
-        url: `${URLS.ROOM}/${token}/rooms`,
+      handleGlobalPostRequest<JoinRoomResponse, { displayName: string }>({
+        url: `${URLS.ROOM}/${token}/join`,
         data: {
           displayName,
         },
@@ -47,8 +67,8 @@ const JoinScreen = ({ onNext }: { onNext: () => void }) => {
         token: roomToken,
         displayName: values.displayName,
       })
-      .then(() => {
-        onNext?.();
+      .then((response) => {
+        onNext?.(response.participant);
       });
   };
 

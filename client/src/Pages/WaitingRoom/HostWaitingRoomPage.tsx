@@ -1,34 +1,10 @@
 import { Check, Copy, Link as LinkIcon, Play, X } from "lucide-react";
 import { useState } from "react";
 import useHostWaitingRoom from "./hook/useHostWaitingRoom";
-
-const DUMMY_PLAYERS = [
-  { id: "1", name: "Maya Chen" },
-  { id: "2", name: "James Kirk" },
-  { id: "3", name: "Priya Patel" },
-  { id: "4", name: "Tom Hendricks" },
-  { id: "5", name: "Sophie Laurent" },
-  { id: "6", name: "Nico Vasquez" },
-  { id: "7", name: "Yuki Tanaka" },
-  { id: "8", name: "Ben Okafor" },
-  { id: "9", name: "Layla Hassan" },
-];
+import BrandMark from "#src/component/Brand/BrandMark";
 
 const MIN_PLAYERS = 2;
 
-function BrandMark() {
-  return (
-    <span className="inline-flex items-center gap-1 font-display text-xl uppercase tracking-[-0.03em] text-ink sm:text-[23px]">
-      <span className="text-primary-500">QUIZ</span> BLITZ
-      <b
-        aria-hidden="true"
-        className="ml-1 text-2xl not-italic text-primary-500"
-      >
-        ϟ
-      </b>
-    </span>
-  );
-}
 
 function PlayerChip({ name }: { name: string }) {
   return (
@@ -43,19 +19,19 @@ function PlayerChip({ name }: { name: string }) {
 }
 
 const HostWaitingRoomPage = () => {
-  const [players] = useState(DUMMY_PLAYERS);
   const [copied, setCopied] = useState(false);
-  
+
   const {
-    states: { roomToken },
+    services: { getCurrentRoomService },
+    states: { roomToken, players },
   } = useHostWaitingRoom();
 
   const canStart = players.length >= MIN_PLAYERS;
-
   const roomCode = roomToken ?? "";
   const joinUrl = roomCode ? `${window.location.origin}/join/${roomCode}` : "";
 
   const handleCopy = async () => {
+    if (!roomCode) return;
     try {
       await navigator.clipboard.writeText(roomCode);
     } catch {
@@ -71,29 +47,38 @@ const HostWaitingRoomPage = () => {
 
   const handleStartQuiz = () => {
     if (!canStart) return;
-    // wire up real "start quiz" flow here
+    // wire up real "start_contest" socket event here
   };
+
+  if (getCurrentRoomService.isLoading) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center bg-canvas"
+        role="status"
+        aria-live="polite"
+      >
+        <span className="font-display text-sm uppercase tracking-[0.12em] text-muted">
+          Loading room…
+        </span>
+      </div>
+    );
+  }
+
+  if (getCurrentRoomService.isError) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center bg-canvas px-5 text-center"
+        role="alert"
+      >
+        <span className="font-display text-sm uppercase tracking-[0.12em] text-danger">
+          We couldn&rsquo;t load this room. Check the link and try again.
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap');
-        .font-display { font-family: 'Anton', sans-serif; }
-        .font-sans { font-family: 'Inter', sans-serif; }
-        :root {
-          --canvas: #080909;
-          --surface: #1e1e1e;
-          --ink: #f2f2f0;
-          --muted: #747474;
-          --line: #292929;
-        }
-        .bg-canvas { background-color: var(--canvas); }
-        .bg-surface { background-color: var(--surface); }
-        .text-ink { color: var(--ink); }
-        .text-muted { color: var(--muted); }
-        .border { border-color: var(--line); }
-      `}</style>
-
       <header className="flex h-16 items-center justify-between border-b px-5 sm:px-10">
         <BrandMark />
         <button
@@ -158,13 +143,19 @@ const HostWaitingRoomPage = () => {
             </span>
           </div>
 
-          <ul className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
-            {players.map((player) => (
-              <li key={player.id}>
-                <PlayerChip name={player.name} />
-              </li>
-            ))}
-          </ul>
+          {players.length === 0 ? (
+            <p className="p-5 text-sm text-muted">
+              Waiting for players to join&hellip;
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
+              {players.map((player) => (
+                <li key={player.id}>
+                  <PlayerChip name={player.name} />
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <button

@@ -4,6 +4,7 @@ import URLS from "#src/config/constant/URLS";
 import QUERY_KEYS from "#src/config/constant/QUERY_KEYS";
 
 export interface RoomLookup {
+  id: string;
   inviteToken: string;
   status: "waiting" | "in_progress" | "completed";
   allowAnonymous: boolean;
