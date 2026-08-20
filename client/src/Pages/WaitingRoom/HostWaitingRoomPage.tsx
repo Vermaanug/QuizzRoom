@@ -24,6 +24,7 @@ const HostWaitingRoomPage = () => {
   const {
     services: { getCurrentRoomService },
     states: { roomToken, players },
+    functions: {startContest}
   } = useHostWaitingRoom();
 
   const canStart = players.length >= MIN_PLAYERS;
@@ -47,7 +48,7 @@ const HostWaitingRoomPage = () => {
 
   const handleStartQuiz = () => {
     if (!canStart) return;
-    // wire up real "start_contest" socket event here
+    startContest()
   };
 
   if (getCurrentRoomService.isLoading) {

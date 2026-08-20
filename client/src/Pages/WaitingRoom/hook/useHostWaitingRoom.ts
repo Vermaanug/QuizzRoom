@@ -9,7 +9,7 @@ interface Player {
 }
 
 const useHostWaitingRoom = () => {
-  const { activeRoutes } = useGlobalRoutesHandler();
+  const { activeRoutes, navigate } = useGlobalRoutesHandler();
 
   const [players, setPlayers] = useState<Player[]>([]);
   const roomToken = activeRoutes[activeRoutes.length - 1];
@@ -43,12 +43,15 @@ const useHostWaitingRoom = () => {
     setPlayers((prev) => prev.filter((p) => p.id !== participantId));
   }, []);
 
-  const { isConnected } = useRoomSocket({
+  const { isConnected, startContest } = useRoomSocket({
     roomId: room?.id,
     auth: room?.id ? {} : null,
     onRoomState: handleRoomState,
     onParticipantJoined: handleParticipantJoined,
     onParticipantDisconnected: handleParticipantDisconnected,
+    onContestStarted: () => {
+      navigate(`/room/${roomToken}/quiz`);
+    },
   });
 
   return {
@@ -61,6 +64,9 @@ const useHostWaitingRoom = () => {
       players,
       isSocketConnected: isConnected,
     },
+    functions: {
+      startContest
+    }
   };
 };
 

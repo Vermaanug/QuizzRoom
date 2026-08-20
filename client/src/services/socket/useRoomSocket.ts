@@ -1,16 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(
-  /\/$/,
-  "",
-);
+const SOCKET_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 interface RoomParticipant {
   id: string;
   displayName: string;
 }
 
+export interface LiveQuestion {
+  id: string;
+  text: string;
+  codeSnippet: string | null;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  timeLimitSeconds: number;
+  // 1-based, matches "Question X of Y" display.
+  index: number;
+  total: number;
+  endsAt: string;
+}
 
 type SocketAuth = Record<string, never> | { participantId: string };
 
@@ -20,6 +33,9 @@ interface UseRoomSocketOptions {
   onParticipantJoined?: (participant: RoomParticipant) => void;
   onParticipantDisconnected?: (participantId: string) => void;
   onRoomState?: (participants: RoomParticipant[]) => void;
+  onContestStarted?: (data: { roomId: string }) => void;
+  onQuestionStarted?: (question: LiveQuestion) => void;
+  onContestEnded?: () => void;
 }
 
 export const useRoomSocket = ({
@@ -28,6 +44,9 @@ export const useRoomSocket = ({
   onParticipantJoined,
   onParticipantDisconnected,
   onRoomState,
+  onContestStarted,
+  onQuestionStarted,
+  onContestEnded,
 }: UseRoomSocketOptions) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -39,7 +58,7 @@ export const useRoomSocket = ({
       auth,
       withCredentials: true,
     });
-    
+
     socketRef.current = socket;
 
     socket.on("connect", () => {
@@ -70,6 +89,18 @@ export const useRoomSocket = ({
       },
     );
 
+    socket.on("contest_started", (data: { roomId: string }) => {
+      onContestStarted?.(data);
+    });
+
+    socket.on("question_started", (question: LiveQuestion) => {
+      onQuestionStarted?.(question);
+    });
+
+    socket.on("contest_ended", () => {
+      onContestEnded?.();
+    });
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
@@ -79,5 +110,13 @@ export const useRoomSocket = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, JSON.stringify(auth)]);
 
-  return { isConnected };
+  const startContest = () => {
+    socketRef.current?.emit("start_contest");
+  };
+
+  const nextQuestion = () => {
+    socketRef.current?.emit("next_question");
+  };
+
+  return { isConnected, startContest, nextQuestion };
 };

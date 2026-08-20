@@ -3,12 +3,20 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import { findUserById } from "../models/userModel.js";
-import { findRoomById } from "../models/roomModel.js";
+import { findRoomById, updateRoomStatus } from "../models/roomModel.js";
+import { findQuestionsByQuizAndOwner } from "../models/questionModel.js";
 import {
   findParticipantById,
   findParticipantsByRoomId,
   markParticipantDisconnected,
 } from "../models/participantModel.js";
+import {
+  startRoomContest,
+  getRoomContest,
+  advanceRoomContest,
+  endRoomContest,
+  toLiveQuestionPayload,
+} from "./contestState.js";
 
 interface DecodedToken {
   id: string;
@@ -39,16 +47,15 @@ export const initSocketServer = (httpServer: HttpServer) => {
       participantId?: string;
     };
 
-
     if (participantId) {
       (socket.data as SocketData).role = "participant";
       (socket.data as SocketData).participantId = participantId;
       return next();
     }
 
-    // Host path — same cookie the REST authMiddleware checks.
-    const token = (socket.request as unknown as { cookies?: Record<string, string> })
-      .cookies?.token;
+    const token = (
+      socket.request as unknown as { cookies?: Record<string, string> }
+    ).cookies?.token;
 
     if (!token) {
       return next(new Error("Authentication required"));
@@ -56,7 +63,10 @@ export const initSocketServer = (httpServer: HttpServer) => {
 
     let decoded: DecodedToken;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as DecodedToken;
+      decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET_KEY as string,
+      ) as DecodedToken;
     } catch {
       return next(new Error("Invalid or expired token"));
     }
@@ -72,10 +82,27 @@ export const initSocketServer = (httpServer: HttpServer) => {
     return next();
   });
 
+  // Shared by start_contest (first question) and next_question
+  // (every question after). Emits question_started, or contest_ended
+  // + marks the room completed once the question list is exhausted.
+  const pushCurrentQuestion = async (roomId: string) => {
+    const contest = getRoomContest(roomId);
+
+    if (!contest || contest.currentIndex >= contest.questions.length) {
+      endRoomContest(roomId);
+      await updateRoomStatus(roomId, "completed");
+      io.to(roomId).emit("contest_ended");
+      return;
+    }
+
+    const question = contest.questions[contest.currentIndex];
+    io.to(roomId).emit(
+      "question_started",
+      toLiveQuestionPayload(question, contest.currentIndex, contest.questions.length),
+    );
+  };
+
   io.on("connection", (socket: Socket) => {
-    // roomId here is the DB Room.id (not the invite token). The host
-    // gets this from GET /room/:token (already returns room.id); the
-    // participant gets it from the join response (participant.roomId).
     socket.on("join_room", async ({ roomId }: { roomId: string }) => {
       const data = socket.data as SocketData;
       const room = await findRoomById(roomId);
@@ -94,10 +121,19 @@ export const initSocketServer = (httpServer: HttpServer) => {
         data.roomId = roomId;
         socket.join(roomId);
 
-        // Hydrates the host's roster with anyone who joined before the
-        // host's socket connected (e.g. host refreshed mid-lobby).
         const participants = await findParticipantsByRoomId(roomId);
         socket.emit("room_state", { participants });
+
+        // Host reconnecting mid-contest (e.g. page refresh on the live
+        // page) — resend the current question so they don't lose state.
+        const contest = getRoomContest(roomId);
+        if (contest && contest.currentIndex < contest.questions.length) {
+          const question = contest.questions[contest.currentIndex];
+          socket.emit(
+            "question_started",
+            toLiveQuestionPayload(question, contest.currentIndex, contest.questions.length),
+          );
+        }
         return;
       }
 
@@ -112,18 +148,86 @@ export const initSocketServer = (httpServer: HttpServer) => {
         data.roomId = roomId;
         socket.join(roomId);
 
-        // Tell everyone else already in the channel (host + other
-        // players) that this participant just joined.
         socket.to(roomId).emit("participant_joined", { participant });
       }
+    });
+
+    socket.on("start_contest", async () => {
+      const data = socket.data as SocketData;
+
+      if (data.role !== "host" || !data.userId || !data.roomId) {
+        socket.emit("error", { message: "Not authorized" });
+        return;
+      }
+
+      const room = await findRoomById(data.roomId);
+
+      if (!room) {
+        socket.emit("error", { message: "Room not found" });
+        return;
+      }
+
+      if (room.hostUserId !== data.userId) {
+        socket.emit("error", { message: "Not authorized for this room" });
+        return;
+      }
+
+      if (room.status === "in_progress") {
+        socket.emit("error", { message: "Contest has already started" });
+        return;
+      }
+
+      const participants = await findParticipantsByRoomId(data.roomId);
+
+      if (participants.length < 2) {
+        socket.emit("error", {
+          message: "At least 2 players are required to start",
+        });
+        return;
+      }
+
+      const questions = await findQuestionsByQuizAndOwner(room.quizId, data.userId);
+
+      if (questions.length === 0) {
+        socket.emit("error", {
+          message: "This quiz has no questions to host",
+        });
+        return;
+      }
+
+      await updateRoomStatus(data.roomId, "in_progress");
+      startRoomContest(data.roomId, questions);
+
+      io.to(data.roomId).emit("contest_started", { roomId: data.roomId });
+      await pushCurrentQuestion(data.roomId);
+    });
+
+    // Host-controlled pacing — the "Next question" button, not an
+    // automatic timer-driven advance (matches the design: the timer
+    // gates participant answering, the host decides when to move on).
+    socket.on("next_question", async () => {
+      const data = socket.data as SocketData;
+
+      if (data.role !== "host" || !data.userId || !data.roomId) {
+        socket.emit("error", { message: "Not authorized" });
+        return;
+      }
+
+      const room = await findRoomById(data.roomId);
+
+      if (!room || room.hostUserId !== data.userId) {
+        socket.emit("error", { message: "Not authorized for this room" });
+        return;
+      }
+
+      advanceRoomContest(data.roomId);
+      await pushCurrentQuestion(data.roomId);
     });
 
     socket.on("disconnect", async () => {
       const data = socket.data as SocketData;
 
       if (data.role === "participant" && data.participantId) {
-        // PRD §6 — no rejoin after disconnect, score locks. Persisted so
-        // this survives a server restart, not just tracked in memory.
         await markParticipantDisconnected(data.participantId);
 
         if (data.roomId) {
