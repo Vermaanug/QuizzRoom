@@ -9,6 +9,7 @@ import DashboardPage from "./Pages/Dashboard/DashboardPage";
 import QuizEditorPage from "./Pages/QuizEditor/QuizEditorPage";
 import HostWaitingRoomPage from "./Pages/WaitingRoom/HostWaitingRoomPage";
 import ParticipantRoomPage from "./Pages/WaitingRoom/ParticipantRoomPage"
+import HostLiveRoomPage from "./Pages/HostLiveRoom/HostLiveRoomPage"
 
 // Define your routes here
 export const router = createBrowserRouter([
@@ -31,6 +32,11 @@ export const router = createBrowserRouter([
         path: "room/:roomToken",
         element: <HostWaitingRoomPage />,
       },
+            {
+        path: "room/:roomToken/quiz",
+        element: <HostLiveRoomPage />,
+      },
+
     ],
   },
   {

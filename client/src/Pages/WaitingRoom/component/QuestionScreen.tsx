@@ -1,124 +1,136 @@
 import BrandMark from "#src/component/Brand/BrandMark";
-import { Check } from "lucide-react";
-import { useState } from "react";
+import type { LiveQuestion } from "#src/services/socket/useRoomSocket";
+import { useEffect, useState } from "react";
 
 interface QuestionScreenProps {
   name: string;
   score: number;
-  onNext: () => void;
+  question: LiveQuestion;
 }
 
-export const ROOM_CODE = "NOVA-7831";
-
-export const DUMMY_PLAYER_COUNT = 10;
-
-export const DUMMY_QUESTION = {
-  index: 1,
-  total: 4,
-  prompt: "Which civilization built the Great Pyramid of Giza?",
-  options: [
-    { id: "A", label: "Mesopotamians" },
-    { id: "B", label: "Egyptians" },
-    { id: "C", label: "Greeks" },
-    { id: "D", label: "Romans" },
-  ],
-  correctOptionId: "B",
-} as const;
-
-export const OPTION_ACCENTS: Record<string, string> = {
+const OPTION_ACCENTS: Record<string, string> = {
   A: "text-primary-600",
   B: "text-primary-500",
   C: "text-success",
   D: "text-danger",
 };
 
-const QuestionScreen = ({
-  name,
-  score,
-  onNext,
-}: QuestionScreenProps) => {
-  const [selectedId, setSelectedId] = useState("B");
+const OPTION_KEYS = ["A", "B", "C", "D"] as const;
 
-  // Replace with the real timer/socket state.
-  const timeIsUp = true;
+const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+
+  // Recomputed from the server's absolute endsAt each second — see the
+  // same pattern in useHostLiveRoom. Resets whenever a new question
+  // arrives (question.id changes).
+  useEffect(() => {
+    setSelectedId(null);
+
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        Math.round((new Date(question.endsAt).getTime() - Date.now()) / 1000),
+      );
+      setRemainingSeconds(remaining);
+    };
+
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [question.id, question.endsAt]);
+
+  const timeIsUp = remainingSeconds <= 0;
+  const timeFraction = Math.min(
+    1,
+    Math.max(0, remainingSeconds / question.timeLimitSeconds),
+  );
+
+  const optionLabel: Record<string, string> = {
+    A: question.optionA,
+    B: question.optionB,
+    C: question.optionC,
+    D: question.optionD,
+  };
+
+  const handleSelect = (optionId: string) => {
+    if (timeIsUp) return;
+    setSelectedId(optionId);
+    // TODO: emit submit_answer once answer persistence/scoring exists.
+  };
 
   return (
     <div className="min-h-screen bg-canvas">
       <header className="flex h-16 items-center justify-between border-b px-5 sm:px-10">
-        <span className="text-sm text-muted">
-          {name.trim() || "Player"}
-        </span>
-
+        <span className="text-sm text-muted">{name.trim() || "Player"}</span>
         <BrandMark size="text-lg" />
-
-        <span className="font-mono text-sm font-semibold text-danger">
+        <span className="font-mono text-sm font-semibold text-primary-500">
           {score} pts
         </span>
       </header>
 
+      <div
+        className="h-1 w-full bg-line"
+        role="progressbar"
+        aria-label="Time remaining"
+        aria-valuenow={remainingSeconds}
+        aria-valuemin={0}
+        aria-valuemax={question.timeLimitSeconds}
+      >
+        <div
+          className="h-full bg-primary-500 transition-[width] duration-1000 ease-linear"
+          style={{ width: `${timeFraction * 100}%` }}
+        />
+      </div>
+
       <main className="mx-auto flex w-full max-w-[900px] flex-col items-center px-5 py-16 sm:px-10">
         <p className="font-display text-xs uppercase tracking-[0.12em] text-muted">
-          Question {DUMMY_QUESTION.index} of {DUMMY_QUESTION.total}
+          Question {question.index} of {question.total}
         </p>
 
         <div
           aria-label={timeIsUp ? "Time's up" : "Time remaining"}
           role="status"
-          className="mt-6 flex h-24 w-24 items-center justify-center rounded-full border-2 border-danger"
+          className="mt-6 flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary-500"
         >
-          <span className="font-display text-3xl text-danger">
-            0
+          <span className="font-display text-3xl text-primary-500">
+            {remainingSeconds}
           </span>
         </div>
 
         <h1 className="mt-8 text-center font-display text-2xl uppercase leading-tight text-ink sm:text-3xl">
-          {DUMMY_QUESTION.prompt}
+          {question.text}
         </h1>
 
-        <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
-          {DUMMY_QUESTION.options.map((option) => {
-            const isSelected = option.id === selectedId;
-            const isCorrect =
-              option.id === DUMMY_QUESTION.correctOptionId;
+        {question.codeSnippet && (
+          <pre className="mt-6 w-full overflow-x-auto border bg-surface p-4 text-left font-mono text-sm text-ink">
+            <code>{question.codeSnippet}</code>
+          </pre>
+        )}
 
-            const revealCorrect =
-              timeIsUp && isSelected && isCorrect;
+        <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+          {OPTION_KEYS.map((optionId) => {
+            const isSelected = optionId === selectedId;
 
             return (
               <button
-                key={option.id}
+                key={optionId}
                 type="button"
-                onClick={() =>
-                  !timeIsUp && setSelectedId(option.id)
-                }
+                onClick={() => handleSelect(optionId)}
                 disabled={timeIsUp}
                 aria-pressed={isSelected}
-                className={`flex h-16 items-center justify-between border px-5 text-left transition focus:outline-none focus:ring-2 focus:ring-primary-700 ${
-                  revealCorrect
-                    ? "border-success bg-success/10"
+                className={`flex h-16 items-center gap-3 border px-5 text-left transition focus:outline-none focus:ring-2 focus:ring-primary-700 ${
+                  isSelected
+                    ? "border-primary-500 bg-primary-500/10"
                     : "border-line bg-surface hover:border-muted"
                 } disabled:cursor-default`}
               >
-                <span className="flex items-center gap-3">
-                  <span
-                    className={`font-display text-base ${
-                      OPTION_ACCENTS[option.id] ?? "text-ink"
-                    }`}
-                  >
-                    {option.id}
-                  </span>
-
-                  <span className="text-base text-ink">
-                    {option.label}
-                  </span>
+                <span
+                  className={`font-display text-base ${OPTION_ACCENTS[optionId] ?? "text-ink"}`}
+                >
+                  {optionId}
                 </span>
-
-                {revealCorrect && (
-                  <Check
-                    className="h-5 w-5 text-success"
-                    aria-hidden="true"
-                  />
-                )}
+                <span className="text-base text-ink">{optionLabel[optionId]}</span>
               </button>
             );
           })}
@@ -132,15 +144,6 @@ const QuestionScreen = ({
             Time&rsquo;s up!
           </p>
         )}
-
-        <button
-          type="button"
-          onClick={onNext}
-          className="mt-6 flex h-14 w-full items-center justify-center gap-2 bg-primary-500 px-5 font-display uppercase tracking-[0.12em] text-black shadow-button transition hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-700"
-        >
-          Next question
-          <span aria-hidden="true">&gt;</span>
-        </button>
       </main>
     </div>
   );

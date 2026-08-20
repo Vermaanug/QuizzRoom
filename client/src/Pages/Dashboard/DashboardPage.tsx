@@ -19,6 +19,7 @@ import { useMemo } from "react";
 import NewQuizModal from "./component/NewQuizModal";
 import useDashboard from "./hook/useDashboard";
 import HostRoomModal from "./component/HostRoomModal";
+import BrandMark from "#src/component/Brand/BrandMark";
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -56,12 +57,7 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-canvas text-ink">
       <header className="relative z-50 border-b border-line/80 bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="font-display text-xl uppercase tracking-[-0.02em] text-primary-500 sm:text-2xl">
-              QuizRoom
-            </span>
-            <span className="text-lg text-primary-500 sm:text-xl">⚡</span>
-          </div>
+         <BrandMark />
 
           <Dropdown
             align="end"

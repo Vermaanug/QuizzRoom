@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
 import JoinScreen, { type JoinedParticipant } from "./component/JoinScreen";
 import LobbyScreen from "./component/LobbyScreen";
-import { useRoomSocket } from "#src/services/socket/useRoomSocket";
+import QuestionScreen from "./component/QuestionScreen";
+import { useRoomSocket, type LiveQuestion } from "#src/services/socket/useRoomSocket";
 
-type RoomPhase = "join" | "lobby";
+type RoomPhase = "join" | "lobby" | "question" | "ended";
 
 interface RoomParticipant {
   id: string;
@@ -16,6 +17,9 @@ const ParticipantRoomPage = () => {
     null,
   );
   const [playerCount, setPlayerCount] = useState(0);
+  const [question, setQuestion] = useState<LiveQuestion | null>(null);
+  
+  const [score, setScore] = useState(0);
 
   const handleJoined = (joined: JoinedParticipant) => {
     setParticipant(joined);
@@ -35,12 +39,24 @@ const ParticipantRoomPage = () => {
     setPlayerCount((prev) => Math.max(1, prev - 1));
   }, []);
 
+  const handleQuestionStarted = useCallback((nextQuestion: LiveQuestion) => {
+    setQuestion(nextQuestion);
+    setPhase("question");
+  }, []);
+
+  const handleContestEnded = useCallback(() => {
+    setQuestion(null);
+    setPhase("ended");
+  }, []);
+
   useRoomSocket({
     roomId: participant?.roomId,
     auth: participant ? { participantId: participant.id } : null,
     onRoomState: handleRoomState,
     onParticipantJoined: handleParticipantJoined,
     onParticipantDisconnected: handleParticipantDisconnected,
+    onQuestionStarted: handleQuestionStarted,
+    onContestEnded: handleContestEnded,
   });
 
   return (
@@ -49,6 +65,23 @@ const ParticipantRoomPage = () => {
 
       {phase === "lobby" && participant && (
         <LobbyScreen name={participant.displayName} playerCount={playerCount} />
+      )}
+
+      {phase === "question" && participant && question && (
+        <QuestionScreen
+          name={participant.displayName}
+          score={score}
+          question={question}
+        />
+      )}
+
+      {phase === "ended" && (
+        <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-5 text-center">
+          <p className="font-display text-2xl uppercase tracking-[0.08em] text-primary-500">
+            Quiz complete
+          </p>
+          <p className="text-sm text-muted">Thanks for playing!</p>
+        </div>
       )}
     </div>
   );
