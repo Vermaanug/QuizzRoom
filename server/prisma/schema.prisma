@@ -54,7 +54,7 @@ model Question {
   optionD       String   @map("option_d") @db.Text
 
   correctOption String   @map("correct_option")
-
+  participantAnswers ParticipantAnswer[]
   timeLimitSeconds Int   @map("time_limit_seconds")
   orderIndex       Int   @map("order_index")
 
@@ -114,7 +114,7 @@ model Participant {
   user           User?                         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   displayName    String                        @map("display_name") @db.VarChar(50)
-
+  answers ParticipantAnswer[]
   connectionStatus ParticipantConnectionStatus @default(connected) @map("connection_status")
 
   joinedAt       DateTime                      @default(now()) @map("joined_at") @db.Timestamptz(6)
@@ -124,3 +124,24 @@ model Participant {
   @@index([roomId, userId])
   @@map("participants")
 }
+
+model ParticipantAnswer {
+  id              String      @id @default(uuid()) @db.Uuid
+
+  participantId   String      @map("participant_id") @db.Uuid
+  participant     Participant @relation(fields: [participantId],references: [id], onDelete: Cascade)
+
+  questionId String      @map("question_id") @db.Uuid
+  question       Question    @relation(fields: [questionId],references: [id],onDelete: Cascade)
+
+  selectedOption  String?     @map("selected_option") @db.VarChar(1)
+  isCorrect       Boolean     @map("is_correct")
+  timeTakenMs     Int         @map("time_taken_ms")
+  answeredAt      DateTime    @default(now()) @map("answered_at") @db.Timestamptz(6)
+
+  @@unique([participantId, questionId])
+  @@index([participantId])
+  @@index([questionId])
+  @@map("participant_answers")
+}
+
