@@ -5,6 +5,7 @@ import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import TextInput from "#src/component/Form/TextInput";
+import toast from "react-hot-toast";
 
 interface JoinRoomFormValues {
   displayName: string;
@@ -59,6 +60,9 @@ const JoinScreen = ({
           displayName,
         },
       }),
+    onError: (error) => {
+      toast.error(`${error?.response?.data?.message}`)
+    }
   });
 
   const onSubmit = (values: JoinRoomFormValues) => {

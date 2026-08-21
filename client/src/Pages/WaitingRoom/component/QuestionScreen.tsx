@@ -56,6 +56,7 @@ const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
   const handleSelect = (optionId: string) => {
     if (timeIsUp) return;
     setSelectedId(optionId);
+    console.log(selectedId)
     // TODO: emit submit_answer once answer persistence/scoring exists.
   };
 
