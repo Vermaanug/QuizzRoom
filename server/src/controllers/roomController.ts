@@ -5,6 +5,7 @@ import {
   createRoom,
   findRoomByInviteToken,
   findRoomByInviteTokenAndStatus,
+  findRoomsByHostUserIdAndStatus,
 } from "../models/roomModel.js";
 import {
   createParticipant,
@@ -162,5 +163,23 @@ export const joinRoomHandler = async (
   return res.status(201).json({
     message: "Joined room successfully",
     participant,
+  });
+};
+
+
+export const getAllPastRoomHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const hostUserId = req.user?.id as string
+
+  const rooms = await findRoomsByHostUserIdAndStatus(
+    hostUserId,
+    "completed"
+  );
+
+  return res.status(200).json({
+    success: true,
+    rooms,
   });
 };

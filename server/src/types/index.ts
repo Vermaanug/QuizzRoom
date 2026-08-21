@@ -25,20 +25,20 @@ export interface ApiResponse<T = unknown> {
 export type RequestHandler = (
   req: AuthenticatedRequest,
   res: Response,
-  next?: NextFunction
+  next?: NextFunction,
 ) => Promise<any> | any;
 
 export type AsyncRequestHandler = (
   req: AuthenticatedRequest,
   res: Response,
-  next?: NextFunction
+  next?: NextFunction,
 ) => Promise<void | any>;
 
 export type ErrorHandler = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void;
 
 // Auth related types
@@ -129,6 +129,10 @@ export type MappedRoom = {
   status: "waiting" | "in_progress" | "completed";
   startedAt: Date | null;
   endedAt: Date | null;
+  quiz?: {
+    id: string;
+    title: string;
+  };
 };
 
 export type MappedParticipant = {
