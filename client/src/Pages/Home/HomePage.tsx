@@ -3,8 +3,9 @@ import { getRoomQueryOptions } from "#src/services/room/useGetRoomService";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useCurrentUser from "#src/services/user/useCurrentUser";
 
 const stats = [
   ["148K+", "Rooms hosted"],
@@ -45,6 +46,10 @@ const HomePage = () => {
     formState: { errors },
   } = useForm<JoinRoomFormValues>();
 
+  const {
+    service: { getCurrentUserService },
+  } = useCurrentUser();
+
   const onJoinRoomSubmit = handleSubmit(async (values) => {
     const roomToken = extractRoomToken(values.roomCode);
 
@@ -65,6 +70,21 @@ const HomePage = () => {
       setIsCheckingRoom(false);
     }
   });
+
+  useEffect(() => {
+    if (getCurrentUserService.isLoading) {
+      return;
+    }
+
+    if (getCurrentUserService.data?.user) {
+      navigateTo({
+        url: "/dashboard",
+      });
+    }
+  }, [
+    getCurrentUserService.data?.user,
+    getCurrentUserService.isLoading,
+  ]);
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
