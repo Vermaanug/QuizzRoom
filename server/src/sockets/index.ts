@@ -107,11 +107,18 @@ export const initSocketServer = (httpServer: HttpServer) => {
     const question = contest.questions[contest.currentIndex];
     io.to(roomId).emit(
       "question_started",
-      toLiveQuestionPayload(question, contest.currentIndex, contest.questions.length),
+      toLiveQuestionPayload(
+        question,
+        contest.currentIndex,
+        contest.questions.length,
+      ),
     );
 
     const total = (await findParticipantsByRoomId(roomId)).length;
-    io.to(roomId).emit("answer_progress", { answeredCount: 0, totalParticipants: total });
+    io.to(roomId).emit("answer_progress", {
+      answeredCount: 0,
+      totalParticipants: total,
+    });
 
     const timer = setTimeout(() => {
       void advanceToNextQuestion(roomId);
@@ -159,7 +166,10 @@ export const initSocketServer = (httpServer: HttpServer) => {
         data.roomId = roomId;
         socket.join(roomId);
 
-        const participants = await findParticipantsByRoomIdAndStatus(roomId, "connected");
+        const participants = await findParticipantsByRoomIdAndStatus(
+          roomId,
+          "connected",
+        );
         socket.emit("room_state", { participants });
 
         socket.to(roomId).emit("participant_joined", { participants });
@@ -169,7 +179,11 @@ export const initSocketServer = (httpServer: HttpServer) => {
           const question = contest.questions[contest.currentIndex];
           socket.emit(
             "question_started",
-            toLiveQuestionPayload(question, contest.currentIndex, contest.questions.length),
+            toLiveQuestionPayload(
+              question,
+              contest.currentIndex,
+              contest.questions.length,
+            ),
           );
           socket.emit("answer_progress", {
             answeredCount: contest.answeredParticipantIds.size,
@@ -190,6 +204,12 @@ export const initSocketServer = (httpServer: HttpServer) => {
         data.roomId = roomId;
         socket.join(roomId);
 
+        const participants = await findParticipantsByRoomIdAndStatus(
+          roomId,
+          "connected",
+        );
+        socket.emit("room_state", { participants });
+
         socket.to(roomId).emit("participant_joined", { participant });
 
         const contest = getRoomContest(roomId);
@@ -197,7 +217,11 @@ export const initSocketServer = (httpServer: HttpServer) => {
           const question = contest.questions[contest.currentIndex];
           socket.emit(
             "question_started",
-            toLiveQuestionPayload(question, contest.currentIndex, contest.questions.length),
+            toLiveQuestionPayload(
+              question,
+              contest.currentIndex,
+              contest.questions.length,
+            ),
           );
         }
       }
@@ -233,7 +257,10 @@ export const initSocketServer = (httpServer: HttpServer) => {
         return;
       }
 
-      const questions = await findQuestionsByQuizAndOwner(room.quizId, data.userId);
+      const questions = await findQuestionsByQuizAndOwner(
+        room.quizId,
+        data.userId,
+      );
       if (questions.length === 0) {
         socket.emit("error", { message: "This quiz has no questions to host" });
         return;
@@ -250,67 +277,86 @@ export const initSocketServer = (httpServer: HttpServer) => {
     // (never a specific questionId from the client — trusting the
     // client's questionId would let a stale/malicious client answer a
     // past question after the fact).
-    socket.on("submit_answer", async ({ selectedOption }: { selectedOption: string | null }) => {
-      const data = socket.data as SocketData;
+    socket.on(
+      "submit_answer",
+      async ({ selectedOption }: { selectedOption: string | null }) => {
+        const data = socket.data as SocketData;
 
-      if (data.role !== "participant" || !data.participantId || !data.roomId) {
-        socket.emit("error", { message: "Not authorized" });
-        return;
-      }
+        if (
+          data.role !== "participant" ||
+          !data.participantId ||
+          !data.roomId
+        ) {
+          socket.emit("error", { message: "Not authorized" });
+          return;
+        }
 
-      const contest = getRoomContest(data.roomId);
-      const question = getCurrentQuestion(data.roomId);
+        const contest = getRoomContest(data.roomId);
+        const question = getCurrentQuestion(data.roomId);
 
-      if (!contest || !question) {
-        socket.emit("error", { message: "No question is currently active" });
-        return;
-      }
+        if (!contest || !question) {
+          socket.emit("error", { message: "No question is currently active" });
+          return;
+        }
 
-      if (hasAnswered(data.roomId, data.participantId)) {
-        socket.emit("error", { message: "You already answered this question" });
-        return;
-      }
+        if (hasAnswered(data.roomId, data.participantId)) {
+          socket.emit("error", {
+            message: "You already answered this question",
+          });
+          return;
+        }
 
-      const now = Date.now();
-      const deadline = contest.currentQuestionStartedAt + question.timeLimitSeconds * 1000;
-      if (now > deadline) {
-        socket.emit("error", { message: "Time is up for this question" });
-        return;
-      }
+        const now = Date.now();
+        const deadline =
+          contest.currentQuestionStartedAt + question.timeLimitSeconds * 1000;
+        if (now > deadline) {
+          socket.emit("error", { message: "Time is up for this question" });
+          return;
+        }
 
-      const existing = await findAnswer(data.participantId, question.id);
-      if (existing) {
-        socket.emit("error", { message: "You already answered this question" });
-        return;
-      }
+        const existing = await findAnswer(data.participantId, question.id);
+        if (existing) {
+          socket.emit("error", {
+            message: "You already answered this question",
+          });
+          return;
+        }
 
-      const isCorrect = selectedOption === question.correctOption;
-      const timeTakenMs = now - contest.currentQuestionStartedAt;
+        const isCorrect = selectedOption === question.correctOption;
+        const timeTakenMs = now - contest.currentQuestionStartedAt;
 
-      await createAnswer({
-        participantId: data.participantId,
-        questionId: question.id,
-        roomId: data.roomId,
-        selectedOption,
-        isCorrect,
-        timeTakenMs,
-      });
+        await createAnswer({
+          participantId: data.participantId,
+          questionId: question.id,
+          roomId: data.roomId,
+          selectedOption,
+          isCorrect,
+          timeTakenMs,
+        });
 
-      recordAnswered(data.roomId, data.participantId);
+        recordAnswered(data.roomId, data.participantId);
 
-      // Private ack to the submitter only — immediate feedback, not
-      // broadcast (so other participants can't infer it).
-      socket.emit("answer_result", { isCorrect, timeTakenMs });
+        // Private ack to the submitter only — immediate feedback, not
+        // broadcast (so other participants can't infer it).
+        socket.emit("answer_result", { isCorrect, timeTakenMs });
 
-      const answeredCount = await countAnsweredForQuestion(data.roomId, question.id);
-      const totalParticipants = (await findParticipantsByRoomId(data.roomId)).length;
-      io.to(data.roomId).emit("answer_progress", { answeredCount, totalParticipants });
+        const answeredCount = await countAnsweredForQuestion(
+          data.roomId,
+          question.id,
+        );
+        const totalParticipants = (await findParticipantsByRoomId(data.roomId))
+          .length;
+        io.to(data.roomId).emit("answer_progress", {
+          answeredCount,
+          totalParticipants,
+        });
 
-      // Everyone's answered — no reason to keep waiting for the timer.
-      if (answeredCount >= totalParticipants) {
-        await advanceToNextQuestion(data.roomId);
-      }
-    });
+        // Everyone's answered — no reason to keep waiting for the timer.
+        if (answeredCount >= totalParticipants) {
+          await advanceToNextQuestion(data.roomId);
+        }
+      },
+    );
 
     // Manual override — lets the host skip a stuck/slow question early.
     // No longer the primary pacing mechanism (that's automatic now via
