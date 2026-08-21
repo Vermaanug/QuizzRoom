@@ -89,6 +89,8 @@ model Room {
   createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
   participants Participant[]
+  answers      ParticipantAnswer[]
+
 
   quiz           Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
   hostUser       User       @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
@@ -131,8 +133,12 @@ model ParticipantAnswer {
   participantId   String      @map("participant_id") @db.Uuid
   participant     Participant @relation(fields: [participantId],references: [id], onDelete: Cascade)
 
-  questionId String      @map("question_id") @db.Uuid
+  questionId      String      @map("question_id") @db.Uuid
   question       Question    @relation(fields: [questionId],references: [id],onDelete: Cascade)
+
+  roomId        String          @map("room_id") @db.Uuid
+  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
 
   selectedOption  String?     @map("selected_option") @db.VarChar(1)
   isCorrect       Boolean     @map("is_correct")
@@ -140,8 +146,7 @@ model ParticipantAnswer {
   answeredAt      DateTime    @default(now()) @map("answered_at") @db.Timestamptz(6)
 
   @@unique([participantId, questionId])
-  @@index([participantId])
-  @@index([questionId])
+  @@index([roomId])
   @@map("participant_answers")
 }
 
