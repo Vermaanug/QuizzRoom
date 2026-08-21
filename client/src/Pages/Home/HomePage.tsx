@@ -46,10 +46,6 @@ const HomePage = () => {
     formState: { errors },
   } = useForm<JoinRoomFormValues>();
 
-  const {
-    service: { getCurrentUserService },
-  } = useCurrentUser();
-
   const onJoinRoomSubmit = handleSubmit(async (values) => {
     const roomToken = extractRoomToken(values.roomCode);
 
@@ -70,21 +66,6 @@ const HomePage = () => {
       setIsCheckingRoom(false);
     }
   });
-
-  useEffect(() => {
-    if (getCurrentUserService.isLoading) {
-      return;
-    }
-
-    if (getCurrentUserService.data?.user) {
-      navigateTo({
-        url: "/dashboard",
-      });
-    }
-  }, [
-    getCurrentUserService.data?.user,
-    getCurrentUserService.isLoading,
-  ]);
 
   return (
     <div className="min-h-screen bg-canvas text-ink">

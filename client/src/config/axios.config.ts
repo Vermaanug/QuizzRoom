@@ -23,9 +23,22 @@ export const apiRequestForm = axios.create({
 apiRequestGlobal.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && !error.config?.url?.includes(URLS.LOGIN)) {
+    const requestUrl = error.config?.url;
+
+    const isCurrentUserRequest =
+      requestUrl?.includes(URLS.CURRENT_USER);
+
+    const isLoginRequest =
+      requestUrl?.includes(URLS.LOGIN);
+
+    if (
+      error.response?.status === 401 &&
+      !isCurrentUserRequest &&
+      !isLoginRequest
+    ) {
       window.location.assign("/auth/login");
     }
+
     return Promise.reject(error);
   },
 );

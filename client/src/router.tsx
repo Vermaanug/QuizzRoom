@@ -10,13 +10,42 @@ import QuizEditorPage from "./Pages/QuizEditor/QuizEditorPage";
 import HostWaitingRoomPage from "./Pages/WaitingRoom/HostWaitingRoomPage";
 import ParticipantRoomPage from "./Pages/WaitingRoom/ParticipantRoomPage"
 import HostLiveRoomPage from "./Pages/HostLiveRoom/HostLiveRoomPage"
+import PublicRoute from "./component/ProtectedRoute/PublicRoute";
 
 // Define your routes here
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <HomePage />,
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/auth",
+        element: <AuthLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/auth/login" replace />,
+          },
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+          {
+            path: "signup",
+            element: <SignupPage />,
+          },
+          {
+            path: "forgot-password",
+            element: <ForgotPasswordPage />,
+          },
+        ],
+      },
+    ],
   },
+
   {
     element: <ProtectedRoute />,
     children: [
@@ -32,39 +61,20 @@ export const router = createBrowserRouter([
         path: "room/:roomToken",
         element: <HostWaitingRoomPage />,
       },
-            {
+      {
         path: "room/:roomToken/quiz",
         element: <HostLiveRoomPage />,
       },
-
     ],
   },
-  {
 
+  {
     path: "join/:roomToken",
     element: <ParticipantRoomPage />,
   },
+
   {
-    path: "/auth",
-    element: <AuthLayout />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/auth/login" replace />,
-      },
-      {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "signup",
-        element: <SignupPage />,
-      },
-      {
-        path: "forgot-password",
-        element: <ForgotPasswordPage />,
-      },
-    ],
+    path: "/home",
+    element: <Navigate to="/dashboard" replace />,
   },
-  { path: "/home", element: <Navigate to="/dashboard" replace /> },
 ]);
