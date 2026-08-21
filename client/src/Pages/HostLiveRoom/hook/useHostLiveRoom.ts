@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 import useGetRoomService from "#src/services/room/useGetRoomService";
-import { useRoomSocket, type LiveQuestion } from "#src/services/socket/useRoomSocket";
+import {
+  useRoomSocket,
+  type LiveQuestion,
+  type RoomResultRow,
+} from "#src/services/socket/useRoomSocket";
 
 interface Player {
   id: string;
@@ -20,7 +24,9 @@ const useHostLiveRoom = () => {
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [question, setQuestion] = useState<LiveQuestion | null>(null);
+  const [answeredCount, setAnsweredCount] = useState(0);
   const [contestEnded, setContestEnded] = useState(false);
+  const [results, setResults] = useState<RoomResultRow[]>([]);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const handleRoomState = useCallback(
@@ -36,9 +42,18 @@ const useHostLiveRoom = () => {
 
   const handleQuestionStarted = useCallback((nextQuestion: LiveQuestion) => {
     setQuestion(nextQuestion);
+    setAnsweredCount(0);
   }, []);
 
-  const handleContestEnded = useCallback(() => {
+  const handleAnswerProgress = useCallback(
+    (data: { answeredCount: number }) => {
+      setAnsweredCount(data.answeredCount);
+    },
+    [],
+  );
+
+  const handleContestEnded = useCallback((data: { results: RoomResultRow[] }) => {
+    setResults(data.results);
     setContestEnded(true);
     setQuestion(null);
   }, []);
@@ -49,12 +64,10 @@ const useHostLiveRoom = () => {
     onRoomState: handleRoomState,
     onParticipantDisconnected: handleParticipantDisconnected,
     onQuestionStarted: handleQuestionStarted,
+    onAnswerProgress: handleAnswerProgress,
     onContestEnded: handleContestEnded,
   });
 
-  // Server sends an absolute endsAt timestamp, not a ticking countdown —
-  // recompute remaining seconds locally every second so a late-joining
-  // or lagging client still lands on the same wall-clock deadline.
   useEffect(() => {
     if (!question) {
       setRemainingSeconds(0);
@@ -81,11 +94,11 @@ const useHostLiveRoom = () => {
       players,
       question,
       remainingSeconds,
+      answeredCount,
       contestEnded,
+      results,
     },
-    functions: {
-      nextQuestion: emitNextQuestion,
-    },
+    functions: { nextQuestion: emitNextQuestion },
   };
 };
 

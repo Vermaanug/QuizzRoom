@@ -6,6 +6,8 @@ interface QuestionScreenProps {
   name: string;
   score: number;
   question: LiveQuestion;
+  correctOption: string | null;
+  onSelect: (optionId: string) => void;
 }
 
 const OPTION_ACCENTS: Record<string, string> = {
@@ -17,13 +19,16 @@ const OPTION_ACCENTS: Record<string, string> = {
 
 const OPTION_KEYS = ["A", "B", "C", "D"] as const;
 
-const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
+const QuestionScreen = ({
+  name,
+  score,
+  question,
+  correctOption,
+  onSelect,
+}: QuestionScreenProps) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
-  // Recomputed from the server's absolute endsAt each second — see the
-  // same pattern in useHostLiveRoom. Resets whenever a new question
-  // arrives (question.id changes).
   useEffect(() => {
     setSelectedId(null);
 
@@ -41,6 +46,8 @@ const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
   }, [question.id, question.endsAt]);
 
   const timeIsUp = remainingSeconds <= 0;
+  const revealed = correctOption !== null;
+  const locked = timeIsUp || selectedId !== null || revealed;
   const timeFraction = Math.min(
     1,
     Math.max(0, remainingSeconds / question.timeLimitSeconds),
@@ -54,10 +61,9 @@ const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
   };
 
   const handleSelect = (optionId: string) => {
-    if (timeIsUp) return;
+    if (locked) return;
     setSelectedId(optionId);
-    console.log(selectedId)
-    // TODO: emit submit_answer once answer persistence/scoring exists.
+    onSelect(optionId);
   };
 
   return (
@@ -112,18 +118,24 @@ const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
         <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
           {OPTION_KEYS.map((optionId) => {
             const isSelected = optionId === selectedId;
+            const isCorrectAnswer = revealed && optionId === correctOption;
+            const isWrongSelected = revealed && isSelected && !isCorrectAnswer;
 
             return (
               <button
                 key={optionId}
                 type="button"
                 onClick={() => handleSelect(optionId)}
-                disabled={timeIsUp}
+                disabled={locked}
                 aria-pressed={isSelected}
                 className={`flex h-16 items-center gap-3 border px-5 text-left transition focus:outline-none focus:ring-2 focus:ring-primary-700 ${
-                  isSelected
-                    ? "border-primary-500 bg-primary-500/10"
-                    : "border-line bg-surface hover:border-muted"
+                  isCorrectAnswer
+                    ? "border-success bg-success/10"
+                    : isWrongSelected
+                      ? "border-danger bg-danger/10"
+                      : isSelected
+                        ? "border-primary-500 bg-primary-500/10"
+                        : "border-line bg-surface hover:border-muted"
                 } disabled:cursor-default`}
               >
                 <span
@@ -137,12 +149,21 @@ const QuestionScreen = ({ name, score, question }: QuestionScreenProps) => {
           })}
         </div>
 
-        {timeIsUp && (
+        {timeIsUp && !revealed && (
           <p
             role="status"
             className="mt-14 font-display text-lg uppercase tracking-[0.08em] text-danger"
           >
             Time&rsquo;s up!
+          </p>
+        )}
+
+        {revealed && (
+          <p
+            role="status"
+            className="mt-14 font-display text-lg uppercase tracking-[0.08em] text-muted"
+          >
+            Waiting for the next question&hellip;
           </p>
         )}
       </main>

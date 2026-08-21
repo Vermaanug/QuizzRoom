@@ -4,6 +4,7 @@ import { findQuizByIdAndOwner, findQuizById } from "../models/quizModel.js";
 import {
   createRoom,
   findRoomByInviteToken,
+  findRoomByInviteTokenAndStatus,
 } from "../models/roomModel.js";
 import {
   createParticipant,
@@ -66,7 +67,7 @@ export const getRoomByTokenHandler = async (
 ) => {
   const { token } = req.params;
 
-  const room = await findRoomByInviteToken(token);
+  const room = await findRoomByInviteTokenAndStatus(token, "waiting");
 
   if (!room) {
     throw new AppError(

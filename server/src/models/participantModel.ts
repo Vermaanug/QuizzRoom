@@ -78,6 +78,23 @@ export const findParticipantsByRoomId = async (
   return participants.map((participant) => mapParticipant(participant)!);
 };
 
+export const findParticipantsByRoomIdAndStatus = async (
+  roomId: string,
+  connectionStatus: "connected" | "disconnected",
+): Promise<MappedParticipant[]> => {
+  const participants = await prisma.participant.findMany({
+    where: {
+      roomId,
+      connectionStatus,
+    },
+    orderBy: {
+      joinedAt: "asc",
+    },
+  });
+
+  return participants.map((participant) => mapParticipant(participant)!);
+};
+
 export const countParticipantsByRoomId = async (
   roomId: string,
 ): Promise<number> => {

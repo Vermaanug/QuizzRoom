@@ -39,6 +39,20 @@ export const findRoomByInviteToken = async (
   return mapRoom(room);
 };
 
+export const findRoomByInviteTokenAndStatus = async (
+  inviteToken: string,
+  status: "waiting" | "in_progress" | "completed",
+): Promise<MappedRoom | null> => {
+  const room = await prisma.room.findUnique({
+    where: {
+      inviteToken,
+      status
+    },
+  });
+
+  return mapRoom(room);
+};
+
 export const findRoomsByQuizId = async (
   quizId: string,
 ): Promise<MappedRoom[]> => {

@@ -19,10 +19,17 @@ export interface LiveQuestion {
   optionC: string;
   optionD: string;
   timeLimitSeconds: number;
-  // 1-based, matches "Question X of Y" display.
   index: number;
   total: number;
   endsAt: string;
+}
+
+export interface RoomResultRow {
+  participantId: string;
+  displayName: string;
+  totalScore: number;
+  totalTimeMs: number;
+  rank: number;
 }
 
 type SocketAuth = Record<string, never> | { participantId: string };
@@ -35,7 +42,10 @@ interface UseRoomSocketOptions {
   onRoomState?: (participants: RoomParticipant[]) => void;
   onContestStarted?: (data: { roomId: string }) => void;
   onQuestionStarted?: (question: LiveQuestion) => void;
-  onContestEnded?: () => void;
+  onQuestionEnded?: (data: { questionId: string; correctOption: string }) => void;
+  onAnswerResult?: (data: { isCorrect: boolean; timeTakenMs: number }) => void;
+  onAnswerProgress?: (data: { answeredCount: number; totalParticipants: number }) => void;
+  onContestEnded?: (data: { results: RoomResultRow[] }) => void;
 }
 
 export const useRoomSocket = ({
@@ -46,6 +56,9 @@ export const useRoomSocket = ({
   onRoomState,
   onContestStarted,
   onQuestionStarted,
+  onQuestionEnded,
+  onAnswerResult,
+  onAnswerProgress,
   onContestEnded,
 }: UseRoomSocketOptions) => {
   const socketRef = useRef<Socket | null>(null);
@@ -54,11 +67,7 @@ export const useRoomSocket = ({
   useEffect(() => {
     if (!roomId || !auth) return;
 
-    const socket = io(SOCKET_URL, {
-      auth,
-      withCredentials: true,
-    });
-
+    const socket = io(SOCKET_URL, { auth, withCredentials: true });
     socketRef.current = socket;
 
     socket.on("connect", () => {
@@ -68,26 +77,17 @@ export const useRoomSocket = ({
 
     socket.on("disconnect", () => setIsConnected(false));
 
-    socket.on(
-      "participant_joined",
-      ({ participant }: { participant: RoomParticipant }) => {
-        onParticipantJoined?.(participant);
-      },
-    );
+    socket.on("participant_joined", ({ participant }: { participant: RoomParticipant }) => {
+      onParticipantJoined?.(participant);
+    });
 
-    socket.on(
-      "participant_disconnected",
-      ({ participantId }: { participantId: string }) => {
-        onParticipantDisconnected?.(participantId);
-      },
-    );
+    socket.on("participant_disconnected", ({ participantId }: { participantId: string }) => {
+      onParticipantDisconnected?.(participantId);
+    });
 
-    socket.on(
-      "room_state",
-      ({ participants }: { participants: RoomParticipant[] }) => {
-        onRoomState?.(participants);
-      },
-    );
+    socket.on("room_state", ({ participants }: { participants: RoomParticipant[] }) => {
+      onRoomState?.(participants);
+    });
 
     socket.on("contest_started", (data: { roomId: string }) => {
       onContestStarted?.(data);
@@ -97,26 +97,36 @@ export const useRoomSocket = ({
       onQuestionStarted?.(question);
     });
 
-    socket.on("contest_ended", () => {
-      onContestEnded?.();
+    socket.on("question_ended", (data: { questionId: string; correctOption: string }) => {
+      onQuestionEnded?.(data);
+    });
+
+    socket.on("answer_result", (data: { isCorrect: boolean; timeTakenMs: number }) => {
+      onAnswerResult?.(data);
+    });
+
+    socket.on(
+      "answer_progress",
+      (data: { answeredCount: number; totalParticipants: number }) => {
+        onAnswerProgress?.(data);
+      },
+    );
+
+    socket.on("contest_ended", (data: { results: RoomResultRow[] }) => {
+      onContestEnded?.(data);
     });
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-    // Reconnect only when the room or identity actually changes, not on
-    // every render of the callback props.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, JSON.stringify(auth)]);
 
-  const startContest = () => {
-    socketRef.current?.emit("start_contest");
-  };
+  const startContest = () => socketRef.current?.emit("start_contest");
+  const nextQuestion = () => socketRef.current?.emit("next_question");
+  const submitAnswer = (selectedOption: string | null) =>
+    socketRef.current?.emit("submit_answer", { selectedOption });
 
-  const nextQuestion = () => {
-    socketRef.current?.emit("next_question");
-  };
-
-  return { isConnected, startContest, nextQuestion };
+  return { isConnected, startContest, nextQuestion, submitAnswer };
 };
