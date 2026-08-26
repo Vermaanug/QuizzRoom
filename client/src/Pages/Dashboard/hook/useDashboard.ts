@@ -23,11 +23,17 @@ const TABS: Array<{ key: TabKey; label: string }> = [
   { key: "draft", label: "Draft" },
 ];
 
+const MAIN_TABS = [
+ { key: "quizzes", label: "My Quizzes" },
+  { key: "ai", label: "Generate with AI" },
+  { key: "pastRooms", label: "Past Rooms" },
+];
+
 const useDashboard = () => {
   const [isNewQuizOpen, setIsNewQuizOpen] = useState(false);
   const [isHostModalOpen, setIsHostModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz>();
-
+  const [activeMainTab , setIsActiveMainTab] = useState(MAIN_TABS[0])
   const [activeTab, setIsActiveTab] = useState(TABS[0]);
 
   const { navigateTo } = useGlobalRoutesHandler();
@@ -107,6 +113,21 @@ const useDashboard = () => {
       }),
   });
 
+  const generateQuizMutation = useMutation({
+    mutationFn: (data: { prompt: string; questionCount: number; title?: string }) =>
+      handleGlobalPostRequest<
+        {
+          message: string;
+          success: boolean;
+          quiz: { id: string; title: string; status: string };
+        },
+        { prompt: string; questionCount: number; title?: string }
+      >({
+        url: `${URLS.QUIZZES}/generate`,
+        data,
+      }),
+  });
+
   const handleCreateRoom = ({
     quizId,
     allowAnonymousPlayers,
@@ -149,6 +170,24 @@ const useDashboard = () => {
     });
   };
 
+  const handleGenerateQuiz = (data: {
+    prompt: string;
+    questionCount: number;
+    title?: string;
+  }) => {
+    generateQuizMutation.mutateAsync(data).then((res) => {
+      toast.success(res?.message || "Quiz generated successfully");
+      queryClientGlobal.invalidateQueries({
+        queryKey: [QUERY_KEYS.QUIZZES],
+      });
+      if (res?.quiz?.id) {
+        // Land on the editor, not the dashboard — AI output should
+        // always be reviewed before it's ever published.
+        navigateTo({ url: `/quiz/${res.quiz.id}` });
+      }
+    });
+  };
+
   const handleDeleteQuiz = (quizId: string) => {
     quizDeleteMutation.mutateAsync(quizId).then((res) => {
       toast.success(res?.message || "Quiz deleted successfully");
@@ -169,6 +208,9 @@ const useDashboard = () => {
       setIsHostModalOpen,
       selectedQuiz,
       setSelectedQuiz,
+      activeMainTab,
+      setIsActiveMainTab,
+      MAIN_TABS
     },
     services: {
       getCurrentUserService,
@@ -179,12 +221,14 @@ const useDashboard = () => {
       quizPublishMutation,
       quizDeleteMutation,
       createRoomMutation,
+      generateQuizMutation
     },
     functions: {
       handleCreateQuiz,
       handleDeleteQuiz,
       handleQuizPublish,
       handleCreateRoom,
+      handleGenerateQuiz
     },
     route: {
       navigateTo,

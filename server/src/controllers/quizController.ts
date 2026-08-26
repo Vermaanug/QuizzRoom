@@ -10,6 +10,8 @@ import {
   updateQuizByIdAndOwner,
 } from "../models/quizModel.js";
 import { AuthenticatedRequest } from "../types/index.js";
+import { generateQuizQuestions } from "../services/quizGenerator.js";
+import { saveQuizQuestionsByOwner } from "../models/questionModel.js";
 
 const normalizeQuizBody = (body: any) => ({
   title: body.title,
@@ -123,3 +125,50 @@ export const publishQuizHandler = async (req: AuthenticatedRequest , res: Respon
   const quiz = await publishQuizByOwner(quizID, ownerId);
   res.json(quiz);
 }
+
+export const generateQuizHandler = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const ownerId = req.user?.id as string;
+  const { prompt, questionCount, title } = req.body as {
+    prompt?: string;
+    questionCount?: number;
+    title?: string;
+  };
+ 
+  if (typeof prompt !== "string" || prompt.trim().length === 0) {
+    throw new AppError("A prompt is required", 400, "VALIDATION_ERROR");
+  }
+ 
+  const count = Number(questionCount) || 20;
+ 
+  const quiz = await createQuiz({
+    ownerId,
+    title: (title?.trim() || prompt.trim().slice(0, 100)),
+    status: "draft",
+  });
+ 
+  let questions;
+  try {
+    questions = await generateQuizQuestions(prompt.trim(), count);
+  } catch (error) {
+    // The quiz shell already exists (so it's not lost — host can retry
+    // generation or write questions manually from the editor) but the
+    // request itself failed, so surface that clearly.
+    throw new AppError(
+      error instanceof Error ? error.message : "Failed to generate questions",
+      502,
+      "AI_GENERATION_FAILED",
+    );
+  }
+ 
+  const savedQuestions = await saveQuizQuestionsByOwner(quiz.id, ownerId, questions);
+ 
+  res.status(201).json({
+    success: true,
+    message: `Generated ${savedQuestions.length} questions`,
+    quiz,
+    questions: savedQuestions,
+  });
+};

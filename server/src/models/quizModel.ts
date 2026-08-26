@@ -34,6 +34,13 @@ export const createQuiz = async ({
       title: title.trim(),
       status,
     },
+    include: {
+      _count: {
+        select: {
+          questions: true,
+        },
+      },
+    },
   });
 
   return mapQuiz(quiz)!;
@@ -42,13 +49,13 @@ export const createQuiz = async ({
 export const findQuizById = async (id: string): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findUnique({
     where: { id },
-    include:{
+    include: {
       _count: {
         select: {
           questions: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   return mapQuiz(quiz);
@@ -56,17 +63,17 @@ export const findQuizById = async (id: string): Promise<MappedQuiz | null> => {
 
 export const findQuizByIdAndOwner = async (
   id: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<MappedQuiz | null> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
-    include:{
+    include: {
       _count: {
         select: {
           questions: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   return mapQuiz(quiz);
@@ -74,7 +81,7 @@ export const findQuizByIdAndOwner = async (
 
 export const findQuizzesByOwner = async (
   ownerId: string,
-  type: QuizFilter = "all"
+  type: QuizFilter = "all",
 ): Promise<MappedQuiz[]> => {
   const quizzes = await prisma.quiz.findMany({
     where: {
@@ -84,13 +91,13 @@ export const findQuizzesByOwner = async (
       }),
     },
     orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
-    include:{
+    include: {
       _count: {
         select: {
           questions: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   return quizzes.map(mapQuiz).filter((q) => q !== null) as MappedQuiz[];
@@ -99,7 +106,7 @@ export const findQuizzesByOwner = async (
 export const updateQuizByIdAndOwner = async (
   id: string,
   ownerId: string,
-  data: UpdateQuizRequest
+  data: UpdateQuizRequest,
 ): Promise<MappedQuiz> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
@@ -122,7 +129,7 @@ export const updateQuizByIdAndOwner = async (
 
 export const deleteQuizByIdAndOwner = async (
   id: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<void> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
@@ -139,17 +146,17 @@ export const deleteQuizByIdAndOwner = async (
 
 export const publishQuizByOwner = async (
   id: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<MappedQuiz> => {
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId },
     include: {
       _count: {
         select: {
-          questions: true
-        }
-      }
-    }
+          questions: true,
+        },
+      },
+    },
   });
 
   if (!quiz) {
@@ -160,21 +167,21 @@ export const publishQuizByOwner = async (
     throw new AppError(
       "Add at least one question before publishing",
       400,
-      "QUIZ_HAS_NO_QUESTIONS"
+      "QUIZ_HAS_NO_QUESTIONS",
     );
   }
- 
+
   const publishedQuiz = await prisma.quiz.update({
     where: { id: quiz.id },
     data: { status: "published" },
     include: {
       _count: {
         select: {
-          questions: true
-        }
-      }
-    }
+          questions: true,
+        },
+      },
+    },
   });
- 
+
   return mapQuiz(publishedQuiz)!;
 };
