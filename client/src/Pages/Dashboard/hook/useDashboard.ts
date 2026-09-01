@@ -151,6 +151,7 @@ const useDashboard = () => {
 
   const handleQuizPublish = ({ quizID }: { quizID: string }) => {
     quizPublishMutation.mutateAsync(quizID).then(() => {
+        toast.success("Quiz Publish successfully");
       queryClientGlobal.invalidateQueries({
         queryKey: [QUERY_KEYS.QUIZZES],
       });

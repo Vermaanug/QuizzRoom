@@ -46,7 +46,7 @@ const DashboardPage = () => {
       MAIN_TABS,
     },
     services: { getCurrentUserService, getAllQuizzesService },
-    mutations: { logoutMutation, createRoomMutation, generateQuizMutation },
+    mutations: { logoutMutation, createRoomMutation, generateQuizMutation, quizPublishMutation },
     functions: {
       handleCreateQuiz,
       handleDeleteQuiz,
@@ -267,7 +267,7 @@ const DashboardPage = () => {
                               setSelectedQuiz(quiz);
                               setIsHostModalOpen(true);
                             }}
-                            // TODO: wire to a host-room action in useDashboard
+                        
                           >
                             <Play size={13} strokeWidth={1.8} />
                             Host

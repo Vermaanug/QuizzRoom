@@ -9,14 +9,17 @@ export const getQuizQuestionsHandler = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const { quizId } = req.params;
+  const { quizID } = req.params;
   const ownerId = req?.user?.id as string;
 
   const questions = await questionModel.findQuestionsByQuizAndOwner(
-    quizId,
+    quizID,
     ownerId,
+  
   );
-  res.json(questions);
+  res.json({
+    questions,
+  });
 };
 
 // PUT /api/quizzes/:quizId/questions
