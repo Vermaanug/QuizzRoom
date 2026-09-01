@@ -4,8 +4,9 @@ import QuestionForm from "./component/QuestionForm";
 import { ArrowLeft, Plus } from "lucide-react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import useQuizEditor from "./hook/useQuizEditor";
-import type { QuizEditorFormValues } from "./QuizEditor.types";
+import type { QuestionInput, QuizEditorFormValues } from "./QuizEditor.types";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 const defaultQuestion = {
   text: "",
@@ -19,8 +20,8 @@ const defaultQuestion = {
 
 const QuizEditorPage = () => {
   const {
-    states: { navigateTo, quizId },
-    services: { getSingleQuizService },
+    states: { navigateTo, quizId, navigate },
+    services: { getSingleQuizService, getQuizQuestionsService },
     mutations: { quizQuestionsSaveMutation },
   } = useQuizEditor();
 
@@ -30,7 +31,7 @@ const QuizEditorPage = () => {
     },
   });
 
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, reset } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -43,10 +44,7 @@ const QuizEditorPage = () => {
     quizQuestionsSaveMutation
       .mutateAsync({ quizId, questions: data.questions })
       .then(() => {
-        navigateTo({
-          url: "dashboard",
-          replace: true
-        })
+        navigate(`/dashboard`);
         toast.success("Quizz Update Successfully");
       });
   };
@@ -54,6 +52,26 @@ const QuizEditorPage = () => {
   const handleAddQuestion = () => {
     append(defaultQuestion);
   };
+
+  useEffect(() => {
+    const fetchedQuestions = getQuizQuestionsService?.data?.questions;
+
+    if (fetchedQuestions && fetchedQuestions.length > 0) {
+      reset({
+        questions: fetchedQuestions.map((q: QuestionInput) => ({
+          text: q.text,
+          codeSnippet: q.codeSnippet ?? "",
+          optionA: q.optionA,
+          optionB: q.optionB,
+          optionC: q.optionC,
+          optionD: q.optionD,
+          correctOption: q.correctOption,
+          timeLimitSeconds: q.timeLimitSeconds,
+        })),
+      });
+    }
+  }, [getQuizQuestionsService?.data, reset]);
+
 
   return (
     <PageWrapper>

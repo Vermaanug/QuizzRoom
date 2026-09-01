@@ -5,6 +5,7 @@ export type CorrectOption = "A" | "B" | "C" | "D";
 export interface QuestionInput {
   id?: string; 
   text: string;
+  codeSnippet?: string;
   optionA: string;
   optionB: string;
   optionC: string;
