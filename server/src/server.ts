@@ -10,6 +10,7 @@ import errorHandler from "./middleware/errorHandler.js";
 import roomRouter from "./routes/roomRoutes.js";
 import { initSocketServer } from "./sockets/index.js";
 import { createServer } from "http";
+import healthRouter from "./routes/healthRoutes.js";
 
 const app: Express = express();
 
@@ -22,6 +23,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/quizzes", quizRouter);
 app.use("/room", roomRouter)
