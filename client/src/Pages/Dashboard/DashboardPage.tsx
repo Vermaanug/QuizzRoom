@@ -46,7 +46,12 @@ const DashboardPage = () => {
       MAIN_TABS,
     },
     services: { getCurrentUserService, getAllQuizzesService },
-    mutations: { logoutMutation, createRoomMutation, generateQuizMutation, quizPublishMutation },
+    mutations: {
+      logoutMutation,
+      createRoomMutation,
+      generateQuizMutation,
+      quizPublishMutation,
+    },
     functions: {
       handleCreateQuiz,
       handleDeleteQuiz,
@@ -267,7 +272,6 @@ const DashboardPage = () => {
                               setSelectedQuiz(quiz);
                               setIsHostModalOpen(true);
                             }}
-                        
                           >
                             <Play size={13} strokeWidth={1.8} />
                             Host
@@ -345,7 +349,7 @@ const DashboardPage = () => {
           isOpen={isNewQuizOpen}
         />
       )}
-      {isHostModalOpen && (
+      {isHostModalOpen && selectedQuiz && (
         <HostRoomModal
           isOpen={isHostModalOpen}
           handleClose={() => {

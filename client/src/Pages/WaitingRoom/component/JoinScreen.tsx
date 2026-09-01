@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import TextInput from "#src/component/Form/TextInput";
 import toast from "react-hot-toast";
+import type { AxiosError } from "node_modules/axios/index.d.cts";
 
 interface JoinRoomFormValues {
   displayName: string;
@@ -46,23 +47,25 @@ const JoinScreen = ({
     },
   });
 
-  const joinRoomParticipant = useMutation({
-    mutationFn: ({
-      token,
-      displayName,
-    }: {
+  const joinRoomParticipant = useMutation<
+    JoinRoomResponse,
+    AxiosError<{ message: string }>,
+    {
       token: string;
       displayName: string;
-    }) =>
+    }
+  >({
+    mutationFn: ({ token, displayName }) =>
       handleGlobalPostRequest<JoinRoomResponse, { displayName: string }>({
         url: `${URLS.ROOM}/${token}/join`,
         data: {
           displayName,
         },
       }),
+
     onError: (error) => {
-      toast.error(`${error?.response?.data?.message}`)
-    }
+      toast.error(error.response?.data?.message || "Failed to join room");
+    },
   });
 
   const onSubmit = (values: JoinRoomFormValues) => {

@@ -17,6 +17,12 @@ import useGlobalRoutesHandler from "#src/services/common/useGlobalRouteHandler";
 
 type TabKey = "all" | "published" | "draft";
 
+interface CreateRoomResponse {
+  room: {
+    inviteToken: string;
+  };
+}
+
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: "all", label: "All" },
   { key: "published", label: "Published" },
@@ -105,7 +111,7 @@ const useDashboard = () => {
       quizId: string;
       allowAnonymous: boolean;
     }) =>
-      handleGlobalPostRequest({
+      handleGlobalPostRequest<CreateRoomResponse, { allowAnonymous: boolean }>({
         url: `${URLS.QUIZZES}/${quizId}/rooms`,
         data: {
           allowAnonymous,
