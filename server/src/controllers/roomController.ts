@@ -3,9 +3,11 @@ import AppError from "../errors/appError.js";
 import { findQuizByIdAndOwner, findQuizById } from "../models/quizModel.js";
 import {
   createRoom,
+  findRoomById,
   findRoomByInviteToken,
   findRoomByInviteTokenAndStatus,
   findRoomsByHostUserIdAndStatus,
+  updateRoomStatus,
 } from "../models/roomModel.js";
 import {
   createParticipant,
@@ -181,5 +183,46 @@ export const getAllPastRoomHandler = async (
   return res.status(200).json({
     success: true,
     rooms,
+  });
+};
+
+export const endRoomHandler = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const { id } = req.params;
+  const hostUserId = req.user?.id;
+
+  if (!hostUserId) {
+    throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
+  }
+
+  const room = await findRoomById(id);
+
+  if (!room) {
+    throw new AppError("Room not found", 404, "ROOM_NOT_FOUND");
+  }
+
+  if (room.hostUserId !== hostUserId) {
+    throw new AppError(
+      "You are not the host of this room",
+      403,
+      "NOT_ROOM_HOST",
+    );
+  }
+
+  if (room.status === "completed") {
+    throw new AppError(
+      "This room has already ended",
+      400,
+      "ROOM_ALREADY_ENDED",
+    );
+  }
+
+  const updatedRoom = await updateRoomStatus(id, "completed");
+
+  return res.status(200).json({
+    message: "Room ended successfully",
+    room: updatedRoom,
   });
 };

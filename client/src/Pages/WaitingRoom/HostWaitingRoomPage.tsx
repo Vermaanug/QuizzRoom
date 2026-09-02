@@ -24,7 +24,8 @@ const HostWaitingRoomPage = () => {
   const {
     services: { getCurrentRoomService },
     states: { roomToken, players },
-    functions: {startContest}
+    functions: {startContest, handleEndRoom},
+    mutations: { endRoomMutation },
   } = useHostWaitingRoom();
 
   const canStart = players.length >= MIN_PLAYERS;
@@ -42,9 +43,7 @@ const HostWaitingRoomPage = () => {
     window.setTimeout(() => setCopied(false), 1500);
   };
 
-  const handleEndRoom = () => {
-    // wire up real "end room" flow here
-  };
+
 
   const handleStartQuiz = () => {
     if (!canStart) return;
@@ -85,6 +84,7 @@ const HostWaitingRoomPage = () => {
         <button
           type="button"
           onClick={handleEndRoom}
+          disabled={endRoomMutation.isPending}
           className="inline-flex items-center gap-2 font-display text-xs uppercase tracking-[0.1em] text-muted transition hover:text-ink focus:outline-none focus:ring-2 focus:ring-primary-700"
         >
           <X className="h-4 w-4" aria-hidden="true" />

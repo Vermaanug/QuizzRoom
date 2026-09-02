@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  endRoomHandler,
   getAllPastRoomHandler,
   getRoomByTokenHandler,
   joinRoomHandler,
@@ -14,6 +15,12 @@ roomRouter.get(
   "/past-rooms",
   authMiddleware,
   asyncHandler(getAllPastRoomHandler)
+);
+
+roomRouter.post(
+  "/:id/end",
+  authMiddleware,
+  asyncHandler(endRoomHandler)
 );
 
 roomRouter.get("/:token", asyncHandler(getRoomByTokenHandler));
